@@ -1,0 +1,121 @@
+.google-maps-page {
+  background-color: var(--color-background-light);
+}
+
+.google-maps-hero {
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary-medium-2));
+  color: var(--color-white);
+}
+
+.google-maps-hero-container {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.google-maps-hero-content h1 {
+  color: var(--color-white);
+  margin-bottom: var(--spacing-md);
+}
+
+.google-maps-hero-content p {
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 720px;
+  margin: 0 auto var(--spacing-sm);
+}
+
+.google-maps-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.google-maps-section {
+  background-color: var(--color-background);
+}
+
+.google-maps-section.google-maps-alt {
+  background-color: var(--color-background-light);
+}
+
+.google-maps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-xl);
+  align-items: flex-start;
+}
+
+.google-maps-card {
+  background-color: var(--color-white);
+  border-radius: 1rem;
+  padding: var(--spacing-lg);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.google-maps-card h2 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.google-maps-card h3 {
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+  font-size: 1rem;
+}
+
+.google-maps-card p {
+  color: var(--color-text-light);
+}
+
+.google-maps-card ul {
+  margin-left: 1rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text-dark);
+}
+
+.google-maps-card li + li {
+  margin-top: 0.25rem;
+}
+
+.google-maps-quote {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-left: 3px solid var(--color-primary-medium-2);
+  background-color: var(--color-background-light);
+  border-radius: 0.5rem;
+}
+
+.google-maps-card-highlight {
+  border: 2px solid var(--color-primary-medium-2);
+}
+
+.google-maps-card-cta {
+  margin-top: var(--spacing-md);
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .google-maps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .google-maps-hero-container {
+    text-align: left;
+  }
+
+  .google-maps-hero-content p {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .google-maps-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+

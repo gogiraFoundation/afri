@@ -1,0 +1,143 @@
+.local-seo-page {
+  background-color: var(--color-background-light);
+}
+
+.local-seo-hero {
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary-medium-2));
+  color: var(--color-white);
+}
+
+.local-seo-hero-container {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.local-seo-hero-content h1 {
+  color: var(--color-white);
+  margin-bottom: var(--spacing-md);
+}
+
+.local-seo-hero-content p {
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 720px;
+  margin: 0 auto var(--spacing-sm);
+}
+
+.local-seo-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.local-seo-section {
+  background-color: var(--color-background);
+}
+
+.local-seo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-xl);
+  align-items: flex-start;
+}
+
+.local-seo-card {
+  background-color: var(--color-white);
+  border-radius: 1rem;
+  padding: var(--spacing-lg);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.local-seo-card h2 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.local-seo-card p {
+  color: var(--color-text-light);
+}
+
+.local-seo-card ul {
+  margin-left: 1rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text-dark);
+}
+
+.local-seo-card li + li {
+  margin-top: 0.25rem;
+}
+
+.local-seo-checklist {
+  list-style: none;
+  margin-left: 0;
+}
+
+.local-seo-checklist li + li {
+  margin-top: 0.25rem;
+}
+
+.local-seo-areas {
+  background-color: var(--color-background-light);
+}
+
+.local-seo-areas-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.local-seo-note {
+  margin-top: var(--spacing-md);
+  color: var(--color-text-light);
+}
+
+.local-seo-cta {
+  background-color: var(--color-primary-dark);
+  color: var(--color-white);
+}
+
+.local-seo-cta-inner {
+  max-width: 800px;
+}
+
+.local-seo-cta-content h2 {
+  color: var(--color-white);
+}
+
+.local-seo-cta-content p {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.local-seo-cta .local-seo-hero-actions {
+  justify-content: flex-start;
+}
+
+@media (max-width: 1024px) {
+  .local-seo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .local-seo-areas-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .local-seo-hero-container {
+    text-align: left;
+  }
+
+  .local-seo-hero-content p {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .local-seo-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+

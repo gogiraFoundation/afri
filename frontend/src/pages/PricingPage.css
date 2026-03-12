@@ -1,0 +1,225 @@
+.pricing-page {
+  background-color: var(--color-background-light);
+}
+
+.pricing-hero {
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary-medium-2));
+  color: var(--color-white);
+}
+
+.pricing-hero-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.pricing-hero-content h1 {
+  color: var(--color-white);
+  margin-bottom: var(--spacing-md);
+}
+
+.pricing-hero-content p {
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 720px;
+  margin: 0 auto var(--spacing-sm);
+}
+
+.pricing-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.pricing-section-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.pricing-section-header p {
+  color: var(--color-text-light);
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.pricing-card {
+  background-color: var(--color-white);
+  border-radius: 1rem;
+  padding: var(--spacing-lg);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pricing-card h3 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.pricing-card-tagline {
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-md);
+}
+
+.pricing-card-list {
+  list-style: none;
+  margin-bottom: var(--spacing-md);
+}
+
+.pricing-card-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.pricing-card-list li::before {
+  content: '•';
+  color: var(--color-primary-medium-2);
+}
+
+.pricing-card-price {
+  margin-top: auto;
+  margin-bottom: var(--spacing-md);
+}
+
+.price-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.25rem;
+}
+
+.price-amount {
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-dark);
+}
+
+.pricing-card-cta {
+  width: 100%;
+  justify-content: center;
+}
+
+.pricing-card-featured {
+  border: 2px solid var(--color-primary-medium-2);
+  position: relative;
+  transform: translateY(-8px);
+}
+
+.pricing-card-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: var(--color-primary-medium-2);
+  color: var(--color-white);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pricing-commercial {
+  display: flex;
+  justify-content: center;
+}
+
+.pricing-commercial-card {
+  max-width: 480px;
+  width: 100%;
+}
+
+.pricing-discounts {
+  background-color: var(--color-background-light);
+}
+
+.pricing-discounts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.discount-card {
+  background-color: var(--color-white);
+  border-radius: 0.75rem;
+  padding: var(--spacing-lg);
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.discount-rate {
+  margin-top: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-medium-2);
+}
+
+.pricing-trust {
+  background-color: var(--color-background);
+}
+
+.pricing-trust-list {
+  list-style: none;
+  max-width: 640px;
+  margin: 0 auto var(--spacing-lg);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1.5rem;
+  text-align: left;
+}
+
+.pricing-trust-actions {
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .pricing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pricing-card-featured {
+    transform: none;
+  }
+
+  .pricing-discounts-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .pricing-hero-container {
+    text-align: left;
+  }
+
+  .pricing-hero-content p {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .pricing-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-discounts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-trust-list {
+    grid-template-columns: 1fr;
+  }
+}
+

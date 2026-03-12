@@ -1,0 +1,123 @@
+.promo-banner {
+  background: linear-gradient(135deg, var(--color-primary-medium-2) 0%, var(--color-primary-medium-1) 100%);
+  color: var(--color-white);
+  padding: var(--spacing-sm) 0;
+  position: relative;
+  z-index: 999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.promo-banner-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.promo-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.promo-badge {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.promo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.promo-title {
+  font-size: 1rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+}
+
+.promo-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.95;
+  line-height: 1.3;
+}
+
+.promo-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.promo-cta {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  background-color: var(--color-white);
+  color: var(--color-primary-medium-2);
+  border: none;
+}
+
+.promo-cta:hover {
+  background-color: var(--color-background-light);
+  transform: translateY(-1px);
+}
+
+.promo-dismiss {
+  background: none;
+  border: none;
+  color: var(--color-white);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.promo-dismiss:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .promo-banner-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+
+  .promo-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .promo-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .promo-cta {
+    flex: 1;
+  }
+
+  .promo-title {
+    font-size: 0.9rem;
+  }
+
+  .promo-subtitle {
+    font-size: 0.8rem;
+  }
+}
+
