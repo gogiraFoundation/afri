@@ -11,6 +11,14 @@ export interface Service {
   price_from?: number;
 }
 
+export interface VATConfig {
+  default_vat_rate: number;
+  vat_rate_percent: number;
+  apply_vat_by_default: boolean;
+  currency: 'GBP';
+  prices_include_vat: boolean;
+}
+
 export interface Booking {
   id?: number;
   name: string;
@@ -30,6 +38,7 @@ export interface Booking {
   subtotal?: number | null;
   vat_amount?: number | null;
   total_with_vat?: number | null;
+  vat_config?: VATConfig;
   status?: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   created_at?: string;
 }

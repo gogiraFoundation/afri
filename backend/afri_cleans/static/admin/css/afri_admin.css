@@ -1,0 +1,207 @@
+/* Afri Cleans - Branded Django admin theme
+ *
+ * Color palette (from frontend):
+ * - Primary Dark:   #005461
+ * - Primary Medium1:#0C777F
+ * - Primary Medium2:#249E94
+ * - Primary Light:  #3BC1A8
+ * - Background:     #F8FAFC
+ * - Text Dark:      #1E293B
+ * - Text Muted:     #64748B
+ */
+
+html[data-theme="light"] body,
+body {
+  background-color: #F8FAFC;
+  color: #1E293B;
+}
+
+/* Header / branding ------------------------------------------------------ */
+
+#header {
+  background: linear-gradient(90deg, #005461, #0C777F);
+  border-bottom: none;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.25);
+}
+
+#header a:link,
+#header a:visited,
+#header a:hover {
+  color: #E5F9F4;
+}
+
+.afri-admin-branding {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+}
+
+.afri-admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.afri-admin-logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #3BC1A8;
+  color: #005461;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.afri-admin-logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.afri-admin-subtitle {
+  font-size: 12px;
+  color: #E2F3F1;
+  font-weight: 400;
+}
+
+.afri-admin-nav-global {
+  margin-top: 4px;
+}
+
+/* Main layout ------------------------------------------------------------ */
+
+#content {
+  padding: 24px;
+}
+
+.module h2,
+.module caption,
+#content-main h1,
+.breadcrumbs {
+  color: #0F172A;
+}
+
+.breadcrumbs {
+  background-color: transparent;
+  padding-left: 0;
+}
+
+.breadcrumbs a {
+  color: #0C777F;
+}
+
+/* Sidebar / app list ----------------------------------------------------- */
+
+.app-core .module caption,
+.app-auth .module caption {
+  background-color: transparent;
+  color: #005461;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Tables / changelist ---------------------------------------------------- */
+
+.change-list .results table,
+.results table {
+  border-radius: 8px;
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.results table thead {
+  background-color: #E0F2F1;
+}
+
+.results table thead th {
+  color: #0F172A;
+  font-weight: 600;
+}
+
+.results table tbody tr:nth-child(even) {
+  background-color: #F1F5F9;
+}
+
+.results table tbody tr:hover {
+  background-color: #DBF4EE;
+}
+
+/* Forms ------------------------------------------------------------------ */
+
+.aligned .form-row,
+.inline-group .form-row {
+  border-bottom-color: #E2E8F0;
+}
+
+.form-row input[type="text"],
+.form-row input[type="email"],
+.form-row input[type="number"],
+.form-row input[type="date"],
+.form-row input[type="tel"],
+.form-row select,
+.form-row textarea {
+  border-radius: 6px;
+  border-color: #CBD5E1;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  border-color: #249E94;
+  box-shadow: 0 0 0 1px rgba(36, 158, 148, 0.35);
+}
+
+fieldset.module {
+  border-radius: 10px;
+  border-color: #E2E8F0;
+}
+
+fieldset.module h2 {
+  font-size: 15px;
+  color: #0C777F;
+}
+
+/* Buttons ---------------------------------------------------------------- */
+
+.submit-row input.default,
+input[type=submit].default,
+.button.default {
+  background-color: #249E94;
+  border-color: #249E94;
+  color: #ffffff;
+}
+
+.submit-row input.default:hover,
+input[type=submit].default:hover,
+.button.default:hover {
+  background-color: #0C777F;
+  border-color: #0C777F;
+}
+
+.submit-row {
+  background-color: #EFF6FF;
+  border-top-color: #DBEAFE;
+}
+
+/* Login page ------------------------------------------------------------- */
+
+.login .submit-row {
+  background: transparent;
+  border: none;
+}
+
+.login .form-row input {
+  border-radius: 6px;
+}
+
+.login #container {
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+}
+

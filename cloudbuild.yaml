@@ -1,0 +1,51 @@
+# Cloud Build: build Django backend image and deploy to Cloud Run.
+# Trigger on push to main, or run manually: gcloud builds submit --config=cloudbuild.yaml .
+# Set substitution variables in trigger or pass: --substitutions=_PROJECT_ID=my-project,_REGION=us-central1,_SERVICE_NAME=afri-api
+
+substitutions:
+  _PROJECT_ID: ${PROJECT_ID}
+  _REGION: us-central1
+  _SERVICE_NAME: afri-api
+  _IMAGE_NAME: afri-api
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  # Build container image (context = backend/)
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/${_PROJECT_ID}/${_IMAGE_NAME}:latest'
+      - '.'
+    dir: backend
+
+  # Push to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push
+    args:
+      - 'push'
+      - 'gcr.io/${_PROJECT_ID}/${_IMAGE_NAME}:latest'
+    waitFor: ['build']
+
+  # Deploy to Cloud Run (env vars and secrets must be set on the Cloud Run service or in a prior deploy)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image'
+      - 'gcr.io/${_PROJECT_ID}/${_IMAGE_NAME}:latest'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+    waitFor: ['push']
+
+images:
+  - 'gcr.io/${_PROJECT_ID}/${_IMAGE_NAME}:latest'

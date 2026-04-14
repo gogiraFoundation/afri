@@ -3,7 +3,7 @@ import './PricingPage.css';
 
 const PricingPage = () => {
   useEffect(() => {
-    document.title = 'Affordable Cleaning Services Pricing | Residential & Commercial Cleaning | Afri Cleans';
+    document.title = 'Pricing | Afri Cleans';
   }, []);
 
   const handleBookNow = () => {
@@ -22,18 +22,12 @@ const PricingPage = () => {
             <span className="section-title">Pricing</span>
             <h1>Transparent Pricing for Professional Cleaning Services</h1>
             <p>
-              At <strong>Afri Cleans</strong>, we believe professional cleaning should be{' '}
-              <strong>simple, affordable, and transparent</strong>. Our pricing is designed to give you{' '}
-              <strong>high-quality cleaning services at competitive rates</strong>, with flexible options tailored to your
-              needs.
-            </p>
-            <p>
-              Whether you need <strong>a one-time deep clean, weekly home cleaning, or commercial cleaning services</strong>,
-              we have a package that works for you.
+              We keep pricing straightforward. Your final quote is based on service scope, property
+              size, and schedule, so you know what to expect before service starts.
             </p>
             <div className="pricing-hero-actions">
               <button className="btn btn-primary" onClick={handleBookNow}>
-                Book Your Cleaning Today →
+                Get a Free Quote
               </button>
               <button className="btn btn-outline" onClick={handleCall}>
                 Call for a Free Estimate: (+012) 87059897
@@ -43,7 +37,7 @@ const PricingPage = () => {
         </div>
       </header>
 
-      <main>
+      <div className="page-content">
         <section className="section pricing-section">
           <div className="container">
             <div className="pricing-section-header">
@@ -72,7 +66,7 @@ const PricingPage = () => {
               </article>
 
               <article className="pricing-card pricing-card-featured">
-                <div className="pricing-card-badge">Most Popular</div>
+                <div className="pricing-card-badge">Common Choice</div>
                 <h3>Standard Cleaning</h3>
                 <p className="pricing-card-tagline">Recommended for homes needing a more thorough clean.</p>
                 <ul className="pricing-card-list">
@@ -223,18 +217,18 @@ const PricingPage = () => {
         <section className="section pricing-section pricing-trust">
           <div className="container">
             <div className="pricing-section-header">
-              <h2>Why Our Clients Love Our Pricing</h2>
+              <h2>Why Clients Choose Our Pricing</h2>
             </div>
             <ul className="pricing-trust-list">
               <li>✔ No hidden fees</li>
               <li>✔ Flexible packages</li>
               <li>✔ Custom cleaning plans</li>
               <li>✔ Free estimates</li>
-              <li>✔ Satisfaction guaranteed</li>
+              <li>✔ Clear scope before service</li>
             </ul>
             <div className="pricing-hero-actions pricing-trust-actions">
               <button className="btn btn-primary" onClick={handleBookNow}>
-                Get Your Free Estimate →
+                Get a Free Quote
               </button>
               <button className="btn btn-outline" onClick={handleCall}>
                 Call Us: (+012) 87059897
@@ -242,7 +236,7 @@ const PricingPage = () => {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 };

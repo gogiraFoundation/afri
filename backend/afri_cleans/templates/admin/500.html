@@ -1,0 +1,22 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Server error" %} | Afri Cleans Admin{% endblock %}
+
+{% block content %}
+  <div class="afri-admin-error-page">
+    <h1>{% trans "Something went wrong on our side" %}</h1>
+    <p>
+      {% trans "An internal error occurred while processing your request in the Afri Cleans admin." %}
+    </p>
+    <p class="afri-admin-error-meta">
+      {% trans "If this keeps happening, please contact the technical team with the time and action you were performing." %}
+    </p>
+    <p>
+      <a href="{% url 'admin:index' %}" class="button default">
+        {% trans "Back to Admin Dashboard" %}
+      </a>
+    </p>
+  </div>
+{% endblock %}
+

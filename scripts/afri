@@ -1,0 +1,371 @@
+#!/usr/bin/env bash
+# Afri repo CLI: local dev, Docker Compose, Django/npm helpers, deploy delegation.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BACKEND="$ROOT/backend"
+FRONTEND="$ROOT/frontend"
+
+compose() {
+  (cd "$ROOT" && docker compose "$@")
+}
+
+require_env_file() {
+  local path=$1
+  local example=$2
+  local label=$3
+  if [[ ! -f "$path" ]]; then
+    echo "Missing ${label}." >&2
+    echo "  cp \"${example}\" \"${path}\"" >&2
+    echo "Then set SECRET_KEY and any other values you need." >&2
+    exit 1
+  fi
+}
+
+warn_if_missing_root_env() {
+  if [[ ! -f "$ROOT/.env" ]]; then
+    echo "Note: no repo-root .env — Compose still uses defaults from docker-compose.yml." >&2
+    echo "  For real secrets set POSTGRES_PASSWORD, SECRET_KEY, etc. via env or:" >&2
+    echo "  cp \"$ROOT/.env.example\" \"$ROOT/.env\"" >&2
+  fi
+}
+
+resolve_backend_python() {
+  if [[ -x "$BACKEND/.venv/bin/python" ]]; then
+    echo "$BACKEND/.venv/bin/python"
+    return 0
+  fi
+  echo "Warning: backend/.venv not found; using python3 from PATH" >&2
+  if ! command -v python3 &>/dev/null; then
+    echo "Error: python3 not found. Create a venv: python3 -m venv backend/.venv" >&2
+    exit 1
+  fi
+  command -v python3
+}
+
+_stack_up_has_detach() {
+  local a
+  for a in "$@"; do
+    if [[ "$a" == "-d" || "$a" == "--detach" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+_wait_backend_health() {
+  local i
+  echo "Polling http://127.0.0.1:8080/api/health/ (up to ~30s)..." >&2
+  for ((i = 1; i <= 30; i++)); do
+    if curl -sf "http://127.0.0.1:8080/api/health/" &>/dev/null; then
+      echo "Backend health check OK." >&2
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Health check timed out; backend may still be starting." >&2
+  return 1
+}
+
+usage() {
+  cat <<'USAGE'
+Afri — repo helper (run from any directory)
+
+  ./scripts/afri help
+
+Local dev (native tools; SQLite if DATABASE_URL unset in backend/.env)
+  ./scripts/afri dev backend          # Django runserver (127.0.0.1:8000)
+  ./scripts/afri dev frontend         # Vite dev server
+  ./scripts/afri dev                  # Lists dev subcommands + stack hint
+
+Docker Compose (Postgres + API + frontend nginx)
+  ./scripts/afri stack up [-d ...]             # docker compose up --build (extra args forwarded)
+  ./scripts/afri stack down
+  ./scripts/afri stack logs [service]
+  ./scripts/afri stack ps
+  ./scripts/afri stack shell            # shell in backend container
+  ./scripts/afri stack manage -- ARGS   # docker compose exec … manage.py ARGS
+  ./scripts/afri stack db               # psql in db container
+
+Django (local .venv or python3)
+  ./scripts/afri backend migrate
+  ./scripts/afri backend makemigrations
+  ./scripts/afri backend createsuperuser
+  ./scripts/afri backend test [args]
+  ./scripts/afri backend shell
+  ./scripts/afri backend seed_services
+  ./scripts/afri backend seed_blog_posts
+  ./scripts/afri backend <any_manage_py_subcommand> [args]
+
+Frontend (npm in frontend/)
+  ./scripts/afri frontend install
+  ./scripts/afri frontend build
+  ./scripts/afri frontend lint
+
+Deploy (wraps existing scripts)
+  ./scripts/afri deploy gcp [args]      # scripts/deploy-gcp.sh
+  ./scripts/afri deploy cloudrun [args] # backend/deploy_backend_cloud_run.sh (needs PROJECT_ID)
+  ./scripts/afri deploy cloudflare      # frontend/deploy_frontend_cloudflare.sh
+
+Other
+  ./scripts/afri doctor | check         # tool versions + quick env checks
+  ./scripts/afri clean                  # docker compose down -v (prompts YES)
+
+DB notes
+  Local: Postgres if DATABASE_URL set; else SQLite (backend/db.sqlite3).
+  Docker: Postgres only; use stack db or stack manage for migrations inside containers.
+USAGE
+}
+
+dev_usage() {
+  cat <<'DEV'
+Usage:
+  ./scripts/afri dev backend     # API at http://127.0.0.1:8000
+  ./scripts/afri dev frontend    # Vite at http://localhost:5173
+
+Full stack in Docker:
+  ./scripts/afri stack up --build
+DEV
+}
+
+deploy_usage() {
+  cat <<'DEP'
+Usage:
+  ./scripts/afri deploy gcp [options]       # see scripts/deploy-gcp.sh --help
+  ./scripts/afri deploy cloudrun [args]     # run from backend/; set PROJECT_ID
+  ./scripts/afri deploy cloudflare          # build for Cloudflare Pages
+DEP
+}
+
+cmd_doctor() {
+  echo "== Versions =="
+  command -v python3 &>/dev/null && python3 --version || echo "python3: not found"
+  command -v node &>/dev/null && node --version || echo "node: not found"
+  command -v npm &>/dev/null && npm --version || echo "npm: not found"
+  if command -v docker &>/dev/null; then
+    docker compose version || true
+  else
+    echo "docker: not found"
+  fi
+  echo ""
+  echo "== Repo paths =="
+  echo "ROOT:     $ROOT"
+  echo "BACKEND:  $BACKEND"
+  echo "FRONTEND: $FRONTEND"
+  echo ""
+  echo "== Checks =="
+  if [[ -d "$BACKEND/.venv" ]]; then
+    echo "backend/.venv: yes"
+  else
+    echo "backend/.venv: no"
+  fi
+  _doctor_env_line "backend/.env" "$BACKEND/.env"
+  _doctor_env_line "frontend/.env" "$FRONTEND/.env"
+  _doctor_env_line "root .env" "$ROOT/.env"
+}
+
+_doctor_env_line() {
+  local label=$1 path=$2
+  if [[ -f "$path" ]]; then
+    echo "$label: present"
+  else
+    echo "$label: missing"
+  fi
+}
+
+cmd_clean() {
+  warn_if_missing_root_env
+  echo "About to run: docker compose down -v" >&2
+  echo "This removes containers and named volumes (including Postgres data)." >&2
+  read -r -p "Type YES to confirm: " confirm
+  if [[ "${confirm:-}" != "YES" ]]; then
+    echo "Aborted." >&2
+    exit 1
+  fi
+  echo "+ docker compose down -v (from $ROOT)"
+  compose down -v
+}
+
+cmd_dev() {
+  local sub="${1:-}"
+  case "$sub" in
+    backend)
+      require_env_file "$BACKEND/.env" "$BACKEND/.env.example" "backend/.env"
+      local py
+      py="$(resolve_backend_python)"
+      echo "+ $py $BACKEND/manage.py runserver 127.0.0.1:8000"
+      (cd "$BACKEND" && exec "$py" manage.py runserver 127.0.0.1:8000)
+      ;;
+    frontend)
+      require_env_file "$FRONTEND/.env" "$FRONTEND/.env.example" "frontend/.env"
+      echo "+ (cd frontend && npm run dev)"
+      (cd "$FRONTEND" && exec npm run dev)
+      ;;
+    "")
+      dev_usage
+      echo ""
+      echo "For Docker instead: ./scripts/afri stack up --build"
+      ;;
+    *)
+      echo "Unknown: dev $sub" >&2
+      dev_usage >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_stack() {
+  warn_if_missing_root_env
+  if [[ $# -lt 1 ]]; then
+    echo "stack: missing subcommand (up|down|logs|ps|shell|manage|db)" >&2
+    exit 1
+  fi
+  local sub="$1"
+  shift
+  case "$sub" in
+    up)
+      echo "+ docker compose up --build $*"
+      if _stack_up_has_detach "$@"; then
+        compose up --build "$@"
+        _wait_backend_health || true
+      else
+        compose up --build "$@"
+      fi
+      ;;
+    down)
+      echo "+ docker compose down"
+      compose down "$@"
+      ;;
+    logs)
+      echo "+ docker compose logs -f $*"
+      compose logs -f "$@"
+      ;;
+    ps)
+      echo "+ docker compose ps"
+      compose ps "$@"
+      ;;
+    shell)
+      echo "+ docker compose exec backend bash -l"
+      compose exec backend bash -l
+      ;;
+    manage)
+      if [[ "${1:-}" == "--" ]]; then
+        shift
+      fi
+      echo "+ docker compose exec backend python manage.py $*"
+      compose exec backend python manage.py "$@"
+      ;;
+    db)
+      echo "+ docker compose exec db psql -U africleans -d africleans"
+      compose exec db psql -U africleans -d africleans "$@"
+      ;;
+    *)
+      echo "Unknown stack subcommand: $sub" >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_backend() {
+  local sub="${1:?backend: subcommand required (e.g. migrate)}"
+  shift
+  require_env_file "$BACKEND/.env" "$BACKEND/.env.example" "backend/.env"
+  local py
+  py="$(resolve_backend_python)"
+  echo "+ $py manage.py $sub $*"
+  (cd "$BACKEND" && exec "$py" manage.py "$sub" "$@")
+}
+
+cmd_frontend() {
+  local sub="${1:?frontend: subcommand required (install|build|lint)}"
+  shift
+  case "$sub" in
+    install)
+      echo "+ (cd frontend && npm install)"
+      (cd "$FRONTEND" && npm install "$@")
+      ;;
+    build)
+      echo "+ (cd frontend && npm run build)"
+      (cd "$FRONTEND" && npm run build "$@")
+      ;;
+    lint)
+      echo "+ (cd frontend && npm run lint)"
+      (cd "$FRONTEND" && npm run lint "$@")
+      ;;
+    *)
+      echo "Unknown frontend subcommand: $sub (install|build|lint)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_deploy() {
+  local target="${1:-}"
+  if [[ -z "$target" ]]; then
+    deploy_usage >&2
+    exit 1
+  fi
+  shift
+  case "$target" in
+    gcp)
+      echo "+ bash \"$ROOT/scripts/deploy-gcp.sh\" $*"
+      exec bash "$ROOT/scripts/deploy-gcp.sh" "$@"
+      ;;
+    cloudrun)
+      echo "+ (cd \"$BACKEND\" && bash ./deploy_backend_cloud_run.sh $*)"
+      (cd "$BACKEND" && bash ./deploy_backend_cloud_run.sh "$@")
+      ;;
+    cloudflare)
+      echo "+ (cd \"$FRONTEND\" && bash ./deploy_frontend_cloudflare.sh $*)"
+      (cd "$FRONTEND" && bash ./deploy_frontend_cloudflare.sh "$@")
+      ;;
+    *)
+      echo "Unknown deploy target: $target" >&2
+      deploy_usage >&2
+      exit 1
+      ;;
+  esac
+}
+
+main() {
+  local cmd="${1:-help}"
+  case "$cmd" in
+    help | -h | --help)
+      usage
+      ;;
+    doctor | check)
+      cmd_doctor
+      ;;
+    clean)
+      cmd_clean
+      ;;
+    dev)
+      shift
+      cmd_dev "$@"
+      ;;
+    stack)
+      shift
+      cmd_stack "$@"
+      ;;
+    backend)
+      shift
+      cmd_backend "$@"
+      ;;
+    frontend)
+      shift
+      cmd_frontend "$@"
+      ;;
+    deploy)
+      shift
+      cmd_deploy "$@"
+      ;;
+    *)
+      echo "Unknown command: $cmd" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

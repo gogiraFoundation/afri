@@ -3,32 +3,49 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 
-def compute_invoice_pricing_from_booking(booking):
+def get_vat_config_payload():
     """
-    Compute base price, subtotal, VAT amount, and total for an invoice
-    based on a Booking instance and current VAT settings.
+    Active VAT/tax settings used for quotes and invoices.
+    Shared by GET /vat-config/ and booking create responses.
     """
-    service = getattr(booking, "service", None)
+    vat_rate = float(getattr(settings, "DEFAULT_VAT_RATE", 0.20))
+    apply_vat = bool(getattr(settings, "APPLY_VAT_BY_DEFAULT", True))
+    return {
+        "default_vat_rate": vat_rate,
+        "vat_rate_percent": round(vat_rate * 100, 2),
+        "apply_vat_by_default": apply_vat,
+        "currency": "GBP",
+        "prices_include_vat": False,
+    }
 
-    # Base price: service.price_from, optionally multiplied by estimated_hours for hourly billing
+
+def calculate_booking_pricing(
+    *,
+    service_price_from,
+    billing_type,
+    estimated_hours=None,
+    promo_code="",
+    promo_discount=None,
+):
+    """
+    Shared booking pricing calculator used by booking and invoicing flows.
+    Returns base_price, discount_amount, subtotal, vat_amount, total.
+    """
     base_price = Decimal("0.00")
-    if service and service.price_from is not None:
-        base_price = Decimal(str(service.price_from))
-        if booking.billing_type == "hourly" and booking.estimated_hours:
-            base_price = base_price * Decimal(str(booking.estimated_hours))
+    if service_price_from is not None:
+        base_price = Decimal(str(service_price_from))
+        if billing_type == "hourly" and estimated_hours:
+            base_price = base_price * Decimal(str(estimated_hours))
 
     subtotal = base_price
-
-    # Apply promotional discount if present
     discount_amount = Decimal("0.00")
-    if booking.promo_code and booking.promo_discount:
-        promo_discount = Decimal(str(booking.promo_discount))
-        discount_amount = subtotal * (promo_discount / Decimal("100"))
+    if promo_code and promo_discount:
+        promo_discount_decimal = Decimal(str(promo_discount))
+        discount_amount = subtotal * (promo_discount_decimal / Decimal("100"))
         subtotal = subtotal - discount_amount
 
-    # VAT handling based on settings
     if getattr(settings, "APPLY_VAT_BY_DEFAULT", True):
-        vat_rate = Decimal(str(getattr(settings, "DEFAULT_VAT_RATE", 0.15)))
+        vat_rate = Decimal(str(getattr(settings, "DEFAULT_VAT_RATE", 0.20)))
         vat_amount = subtotal * vat_rate
     else:
         vat_amount = Decimal("0.00")
@@ -44,10 +61,27 @@ def compute_invoice_pricing_from_booking(booking):
     }
 
 
+def compute_invoice_pricing_from_booking(booking):
+    """
+    Compute base price, subtotal, VAT amount, and total for an invoice
+    based on a Booking instance and current VAT settings.
+    """
+    service = getattr(booking, "service", None)
+
+    return calculate_booking_pricing(
+        service_price_from=getattr(service, "price_from", None),
+        billing_type=getattr(booking, "billing_type", "fixed"),
+        estimated_hours=getattr(booking, "estimated_hours", None),
+        promo_code=getattr(booking, "promo_code", ""),
+        promo_discount=getattr(booking, "promo_discount", None),
+    )
+
+
 def send_booking_notification(booking):
     """Send email notification when a new booking is created"""
     admin_email = getattr(settings, 'ADMIN_EMAIL', 'admin@africleans.com')
     
+    vat_rate_percent = int(Decimal(str(getattr(settings, "DEFAULT_VAT_RATE", 0.20))) * Decimal("100"))
     subject = f'New Booking Request: {booking.service.name}'
     message = f"""
 New booking request received:
@@ -64,12 +98,12 @@ Address: {booking.address}
 Notes: {booking.notes or 'None'}
 
 Estimated Hours: {booking.estimated_hours or 'Not specified'}
-Base Price: ${booking.estimated_price or 'Not calculated'}
+Base Price: GBP {booking.estimated_price or 'Not calculated'}
 Promo Code: {booking.promo_code or 'None'}
 Promo Discount: {f"{booking.promo_discount}%" if booking.promo_discount else "None"}
-Subtotal: ${booking.subtotal or booking.estimated_price or 'Not calculated'}
-VAT Amount: ${booking.vat_amount or '0.00'}
-Total (with VAT): ${booking.total_with_vat or booking.subtotal or booking.estimated_price or 'Not calculated'}
+Subtotal: GBP {booking.subtotal or booking.estimated_price or 'Not calculated'}
+VAT Amount: GBP {booking.vat_amount or '0.00'}
+Total (with VAT): GBP {booking.total_with_vat or booking.subtotal or booking.estimated_price or 'Not calculated'}
 
 You can view and manage this booking in the Django admin panel.
 """
@@ -98,11 +132,11 @@ Billing: {booking.get_billing_type_display()}
 Estimated hours: {booking.estimated_hours or 'Not specified'}
 
 Pricing Estimate:
-Base Price: ${booking.estimated_price or 'To be confirmed'}
+Base Price: GBP {booking.estimated_price or 'To be confirmed'}
 {f"Promo Code Applied: {booking.promo_code} ({booking.promo_discount}% off)" if booking.promo_code else ""}
-Subtotal: ${booking.subtotal or booking.estimated_price or 'To be confirmed'}
-{f"VAT (15%): ${booking.vat_amount}" if booking.vat_amount else ""}
-Total Estimate: ${booking.total_with_vat or booking.subtotal or booking.estimated_price or 'To be confirmed after site visit'}
+Subtotal: GBP {booking.subtotal or booking.estimated_price or 'To be confirmed'}
+{f"VAT ({vat_rate_percent}%): GBP {booking.vat_amount}" if booking.vat_amount else ""}
+Total Estimate: GBP {booking.total_with_vat or booking.subtotal or booking.estimated_price or 'To be confirmed after site visit'}
 
 Note: This is an instant estimate. Final pricing will be confirmed after our team reviews your request.
 
@@ -133,6 +167,7 @@ def send_invoice_email(invoice):
     customer_email = invoice.booking.email
     customer_name = invoice.booking.name
     
+    vat_rate_percent = int(Decimal(str(getattr(settings, "DEFAULT_VAT_RATE", 0.20))) * Decimal("100"))
     subject = f'Invoice {invoice.invoice_number} - Afri Cleans'
     
     # Create HTML email content
@@ -156,12 +191,12 @@ def send_invoice_email(invoice):
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                 <tr>
                     <td style="padding: 8px; border-bottom: 1px solid #ddd;">Subtotal:</td>
-                    <td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">${invoice.subtotal:.2f}</td>
+                    <td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">GBP {invoice.subtotal:.2f}</td>
                 </tr>
-                {f'<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">VAT (15%):</td><td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">${invoice.vat_amount:.2f}</td></tr>' if invoice.vat_amount > 0 else ''}
+                {f'<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">VAT ({vat_rate_percent}%):</td><td style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">GBP {invoice.vat_amount:.2f}</td></tr>' if invoice.vat_amount > 0 else ''}
                 <tr style="background-color: #e8f4f5;">
                     <td style="padding: 12px; font-weight: bold; font-size: 1.1em;">Total:</td>
-                    <td style="text-align: right; padding: 12px; font-weight: bold; font-size: 1.1em;">${invoice.total:.2f}</td>
+                    <td style="text-align: right; padding: 12px; font-weight: bold; font-size: 1.1em;">GBP {invoice.total:.2f}</td>
                 </tr>
             </table>
             
@@ -193,9 +228,9 @@ Issue Date: {invoice.issue_date.strftime('%B %d, %Y')}
 {f'Due Date: {invoice.due_date.strftime("%B %d, %Y")}' if invoice.due_date else ''}
 Service: {invoice.description}
 
-Subtotal: ${invoice.subtotal:.2f}
-{f'VAT (15%): ${invoice.vat_amount:.2f}' if invoice.vat_amount > 0 else ''}
-Total: ${invoice.total:.2f}
+Subtotal: GBP {invoice.subtotal:.2f}
+{f'VAT ({vat_rate_percent}%): GBP {invoice.vat_amount:.2f}' if invoice.vat_amount > 0 else ''}
+Total: GBP {invoice.total:.2f}
 
 If you have any questions about this invoice, please don't hesitate to contact us.
 

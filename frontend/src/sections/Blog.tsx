@@ -15,7 +15,9 @@ const Blog = () => {
         const data = await getBlogPosts();
         setPosts(data);
       } catch (err) {
-        console.error('Failed to load blog posts', err);
+        if (import.meta.env.DEV) {
+          console.error('Failed to load blog posts', err);
+        }
         setError('Unable to load latest articles right now.');
       } finally {
         setLoading(false);

@@ -5,29 +5,24 @@ const AboutUs = () => {
   const { ref, isVisible } = useScrollAnimation();
   const features = [
     {
-      icon: '⭐',
-      title: 'Experienced & Trained Cleaners',
-      description: 'Seasoned cleaning specialists dedicated to delivering consistently high-quality results.',
+      icon: '🧭',
+      title: 'Dependable from day one',
+      description: 'As a growing company, we focus on punctuality, careful work, and consistent follow-through.',
     },
     {
       icon: '🌿',
-      title: 'Eco-Friendly Cleaning Products',
-      description: 'Safe, eco-conscious products that protect your family, staff, and the environment.',
+      title: 'Eco-conscious options',
+      description: 'We can use eco-conscious products when requested for homes, teams, and shared spaces.',
     },
     {
-      icon: '✨',
-      title: 'Reliable & Punctual Service',
-      description: 'Flexible scheduling and on-time arrivals so cleaning fits seamlessly into your day.',
+      icon: '🧼',
+      title: 'Tailored service scope',
+      description: 'Routine cleaning and one-time deep cleans are planned around your priorities and schedule.',
     },
     {
       icon: '📋',
-      title: 'Customized Cleaning Plans',
-      description: 'Tailored cleaning solutions for modern homes, offices, and commercial spaces.',
-    },
-    {
-      icon: '✅',
-      title: 'Satisfaction Guaranteed',
-      description: 'We stand behind our work and aim to exceed your expectations on every visit.',
+      title: 'Responsive support',
+      description: 'Clear communication before, during, and after service so expectations stay aligned.',
     },
   ];
 
@@ -35,14 +30,14 @@ const AboutUs = () => {
     <section id="about" ref={ref as React.RefObject<HTMLElement>} className={`section about-section ${isVisible ? 'animate-in' : ''}`}>
       <div className="container">
         <div className="about-header">
-          <span className="section-title">ABOUT US</span>
-          <h2>Your Trusted Professional Cleaning Company</h2>
+          <span className="section-title">ABOUT AFRI CLEANS</span>
+          <h2>A New Standard of Clean, Built on Consistency</h2>
           <p className="about-description">
-            At Afri Cleans, we believe that a clean space creates a better quality of life. Our
-            trained cleaning specialists provide top-quality residential and commercial cleaning
-            services designed for modern homes and businesses. Using advanced techniques, professional
-            equipment, and eco-friendly products, we thoroughly clean and sanitize every corner to
-            improve comfort, hygiene, and well-being.
+            Afri Cleans is a modern cleaning company focused on dependable, high-quality service for
+            residential and commercial spaces. As a growing business, we know trust is earned visit
+            by visit. That is why we prioritize punctuality, careful work, and responsive customer
+            support. Whether you need routine cleaning or a one-time deep clean, we tailor each
+            service to your space, priorities, and schedule.
           </p>
         </div>
 
@@ -56,15 +51,6 @@ const AboutUs = () => {
           ))}
         </div>
 
-        <div className="about-badge">
-          <div className="badge-content">
-            <span className="badge-number">20+</span>
-            <span className="badge-text">Years of cleaning experience</span>
-          </div>
-          <a href="#" className="badge-link">
-            Read more →
-          </a>
-        </div>
       </div>
     </section>
   );

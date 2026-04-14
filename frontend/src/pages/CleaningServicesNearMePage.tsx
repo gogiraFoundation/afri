@@ -3,7 +3,7 @@ import './CleaningServicesNearMePage.css';
 
 const CleaningServicesNearMePage = () => {
   useEffect(() => {
-    document.title = 'Cleaning Services Near Me | Local Residential & Commercial Cleaning | Afri Cleans';
+    document.title = 'Local Cleaning Services | Afri Cleans';
   }, []);
 
   const goToBooking = () => {
@@ -26,16 +26,12 @@ const CleaningServicesNearMePage = () => {
             <span className="section-title">Local Cleaning</span>
             <h1>Professional Cleaning Services Near You</h1>
             <p>
-              Looking for <strong>reliable cleaning services near you</strong>? Afri Cleans provides professional
-              residential and commercial cleaning services designed to keep your space clean, healthy, and comfortable.
-            </p>
-            <p>
-              Our experienced cleaning professionals proudly serve homeowners and businesses looking for{' '}
-              <strong>affordable, high-quality cleaning solutions</strong>.
+              Looking for reliable local cleaning? Afri Cleans supports residential and commercial
+              spaces with clear communication and dependable scheduling.
             </p>
             <div className="local-seo-hero-actions">
               <button className="btn btn-primary" onClick={goToBooking}>
-                Book Local Cleaning →
+                Get a Free Quote
               </button>
               <button className="btn btn-outline" onClick={callNow}>
                 Call: (+012) 87059897
@@ -45,7 +41,7 @@ const CleaningServicesNearMePage = () => {
         </div>
       </header>
 
-      <main>
+      <div className="page-content">
         <section className="section local-seo-section">
           <div className="container local-seo-grid">
             <article className="local-seo-card">
@@ -68,11 +64,11 @@ const CleaningServicesNearMePage = () => {
             <article className="local-seo-card">
               <h2>Why Choose Our Local Cleaning Services?</h2>
               <ul className="local-seo-checklist">
-                <li>✔ Trusted local cleaning company</li>
-                <li>✔ Experienced professional cleaners</li>
+                <li>✔ Clear service plans and transparent pricing</li>
+                <li>✔ Trained professionals</li>
                 <li>✔ Flexible scheduling</li>
-                <li>✔ Affordable pricing</li>
-                <li>✔ Satisfaction guaranteed</li>
+                <li>✔ Responsive support</li>
+                <li>✔ Follow-up after service</li>
               </ul>
               <p>
                 We focus on long-term relationships with our clients, not one-time jobs. When you search for{' '}
@@ -111,7 +107,7 @@ const CleaningServicesNearMePage = () => {
               </p>
               <div className="local-seo-hero-actions">
                 <button className="btn btn-primary" onClick={goToBooking}>
-                  Get a Free Local Estimate →
+                  Get a Free Quote
                 </button>
                 <button className="btn btn-outline" onClick={callNow}>
                   Call: (+012) 87059897
@@ -123,7 +119,7 @@ const CleaningServicesNearMePage = () => {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 .brochure-page {
   min-height: 100vh;
   background-color: var(--color-background-light);
-  padding: var(--spacing-xl);
+  padding: calc(4.5rem + var(--spacing-xl)) var(--spacing-xl) var(--spacing-xl);
 }
 
 .brochure-shell {

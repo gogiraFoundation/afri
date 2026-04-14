@@ -5,6 +5,14 @@ export const useScrollAnimation = (threshold = 0.1) => {
   const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    if (
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

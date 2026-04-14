@@ -32,7 +32,7 @@ const BrochurePage = () => {
         <header className="brochure-header">
           <div>
             <h1 className="brochure-title">Afri Cleans</h1>
-            <p className="brochure-subtitle">Professional Cleaning Service Brochure</p>
+            <p className="brochure-subtitle">Cleaning Services Brochure</p>
           </div>
           <div className="brochure-header-actions">
             <button className="btn btn-outline brochure-back-btn" onClick={handleBackToSite}>
@@ -42,17 +42,17 @@ const BrochurePage = () => {
           </div>
         </header>
 
-        <main className="brochure-grid">
+        <div className="brochure-grid">
           <section className="brochure-panel brochure-panel-about">
             <h2 className="brochure-section-title">About our service</h2>
             <p>
-              Afri Cleans provides professional residential and commercial cleaning tailored to busy households and
-              growing businesses. Our trained cleaners follow a detailed checklist on every visit so your spaces stay
-              fresh, healthy, and guest-ready all week long.
+              Afri Cleans provides residential and commercial cleaning tailored to busy households
+              and growing businesses. We focus on punctuality, careful work, and responsive
+              communication.
             </p>
             <p>
-              Whether you need a one-time deep clean, recurring maintenance, or post-construction support, our team
-              arrives on time with everything required to get the job done properly.
+              Whether you need a one-time deep clean, recurring maintenance, or post-construction
+              support, we adapt service scope to your priorities and schedule.
             </p>
           </section>
 
@@ -84,7 +84,7 @@ const BrochurePage = () => {
               <p>Website: africleans.com</p>
             </div>
           </section>
-        </main>
+        </div>
 
         <footer className="brochure-footer">
           <p>Afri Cleans · Professional Cleaning Services</p>

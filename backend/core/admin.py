@@ -25,16 +25,20 @@ class BookingAdmin(admin.ModelAdmin):
     ordering = ['-created_at']
     fieldsets = (
         ('Customer Information', {
-            'fields': ('name', 'email', 'phone', 'address')
+            'fields': ('name', 'email', 'phone', 'address'),
+            'classes': ('afri-fieldset',),
         }),
         ('Service Details', {
-            'fields': ('service', 'job_type', 'billing_type', 'preferred_date', 'preferred_time_window', 'estimated_hours', 'notes')
+            'fields': ('service', 'job_type', 'billing_type', 'preferred_date', 'preferred_time_window', 'estimated_hours', 'notes'),
+            'classes': ('afri-fieldset',),
         }),
-        ('Pricing', {
-            'fields': ('estimated_price', 'promo_code', 'promo_discount', 'subtotal', 'vat_amount', 'total_with_vat')
+        ('Pricing Overview', {
+            'fields': ('estimated_price', 'promo_code', 'promo_discount', 'subtotal', 'vat_amount', 'total_with_vat'),
+            'classes': ('afri-fieldset', 'afri-pricing',),
         }),
-        ('Status', {
-            'fields': ('status', 'created_at', 'updated_at')
+        ('Status & Timestamps', {
+            'fields': ('status', 'created_at', 'updated_at'),
+            'classes': ('collapse', 'afri-fieldset',),
         }),
     )
     actions = ['generate_receipts']
@@ -89,11 +93,13 @@ class PromotionAdmin(admin.ModelAdmin):
     actions = ['set_as_active_banner_promo', 'deactivate_all_promotions']
     fieldsets = (
         ('Promotion Details', {
-            'fields': ('title', 'subtitle', 'badge_text', 'promo_code', 'discount_percentage')
+            'fields': ('title', 'subtitle', 'badge_text', 'promo_code', 'discount_percentage'),
+            'classes': ('afri-fieldset',),
         }),
         ('Status & Dates', {
             'fields': ('is_active', 'start_date', 'end_date', 'is_currently_active', 'banner_help_text'),
-            'description': 'Set "Is active" to True and ensure dates are valid for the promotion to appear in the banner. Use the admin action "Set as active banner promo" to automatically activate this and deactivate others.'
+            'description': 'Set "Is active" to True and ensure dates are valid for the promotion to appear in the banner. Use the admin action "Set as active banner promo" to automatically activate this and deactivate others.',
+            'classes': ('afri-fieldset', 'afri-promo-status',),
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

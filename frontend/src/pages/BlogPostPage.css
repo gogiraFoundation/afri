@@ -1,7 +1,7 @@
 .blog-post-page {
   min-height: 100vh;
   background-color: var(--color-background-light);
-  padding: var(--spacing-xl);
+  padding: calc(4.5rem + var(--spacing-xl)) var(--spacing-xl) var(--spacing-xl);
 }
 
 .blog-post-shell {
@@ -73,7 +73,7 @@
 
 @media (max-width: 768px) {
   .blog-post-page {
-    padding: var(--spacing-lg);
+    padding: calc(4.5rem + var(--spacing-lg)) var(--spacing-lg) var(--spacing-lg);
   }
 
   .blog-post-shell {

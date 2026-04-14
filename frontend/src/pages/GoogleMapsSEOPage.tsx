@@ -18,13 +18,12 @@ const GoogleMapsSEOPage = () => {
             <span className="section-title">Google Maps SEO</span>
             <h1>Google Business Profile Strategy for Cleaning Services</h1>
             <p>
-              To get more <strong>local cleaning clients</strong>, ranking on Google Maps is essential. This step-by-step
-              strategy shows how Afri Cleans optimizes its <strong>Google Business Profile</strong> to generate a steady
-              flow of local leads.
+              This guide explains practical steps to keep a cleaning company profile clear,
+              discoverable, and trustworthy on Google Maps.
             </p>
             <div className="google-maps-hero-actions">
               <button className="btn btn-primary" onClick={goToBooking}>
-                Book a Cleaning →
+                Get a Free Quote
               </button>
               <a
                 href="https://business.google.com"
@@ -39,7 +38,7 @@ const GoogleMapsSEOPage = () => {
         </div>
       </header>
 
-      <main>
+      <div className="page-content">
         <section className="section google-maps-section">
           <div className="container google-maps-grid">
             <article className="google-maps-card">
@@ -104,10 +103,10 @@ const GoogleMapsSEOPage = () => {
             </article>
 
             <article className="google-maps-card">
-              <h2>Step 4: Get Reviews from Happy Clients</h2>
+              <h2>Step 4: Request Reviews After Service</h2>
               <p>
-                Reviews are one of the <strong>top ranking factors</strong> for Google Maps. Aim for at least{' '}
-                <strong>50+ Google reviews</strong> from satisfied customers.
+                Reviews are one of the major ranking signals on Google Maps. Focus on collecting
+                genuine feedback after successful visits.
               </p>
               <h3>Simple review request script</h3>
               <p className="google-maps-quote">
@@ -151,12 +150,12 @@ const GoogleMapsSEOPage = () => {
                 looking for a trusted cleaning partner.
               </p>
               <button className="btn btn-primary google-maps-card-cta" onClick={goToBooking}>
-                Book a Local Cleaning with Afri Cleans →
+                Get a Free Quote
               </button>
             </article>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 };

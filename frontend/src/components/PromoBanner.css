@@ -59,6 +59,20 @@
   gap: var(--spacing-sm);
 }
 
+.promo-text-cta {
+  color: var(--color-white);
+  font-weight: var(--font-weight-medium);
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  white-space: nowrap;
+  padding: 0.35rem 0.25rem;
+}
+
+.promo-text-cta:hover {
+  color: var(--color-primary-light);
+}
+
 .promo-cta {
   padding: 0.5rem 1.25rem;
   font-size: 0.9rem;

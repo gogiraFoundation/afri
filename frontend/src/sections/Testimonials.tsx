@@ -1,43 +1,36 @@
 import './Testimonials.css';
 
 const Testimonials = () => {
-  const testimonials = [
-    {
-      quote:
-        'Afri Cleans transformed our home. The team was professional, punctual, and extremely thorough.',
-      author: 'Residential Client',
-    },
-    {
-      quote:
-        'Our office has never looked better. Highly recommended for commercial cleaning.',
-      author: 'Business Owner',
-    },
-    {
-      quote: 'Reliable, affordable, and very professional.',
-      author: 'Happy Customer',
-    },
+  const trustPoints = [
+    'Responsive communication from quote request to follow-up.',
+    'Clear scope and expectations before each visit.',
+    'Attention to detail for both one-time and recurring clients.',
   ];
 
   return (
     <section id="testimonials" className="section testimonials-section">
       <div className="container">
         <div className="testimonials-header">
-          <span className="section-title">CUSTOMER TESTIMONIALS</span>
-          <h2>What Our Clients Say</h2>
+          <span className="section-title">SOCIAL PROOF</span>
+          <h2>Building Trust with Every Visit</h2>
           <p className="testimonials-description">
-            Trusted by homeowners and businesses alike, Afri Cleans delivers consistent, high-quality
-            cleaning services with a personal touch.
+            We are currently onboarding new recurring and one-time clients. If you are looking for
+            a responsive cleaning partner that values quality and communication, we would love to
+            work with you.
           </p>
         </div>
 
         <div className="testimonials-grid">
-          {testimonials.map((item, index) => (
+          {trustPoints.map((item, index) => (
             <div key={index} className="testimonial-card">
-              <div className="testimonial-rating">★★★★★</div>
-              <p className="testimonial-quote">“{item.quote}”</p>
-              <p className="testimonial-author">{item.author}</p>
+              <p className="testimonial-quote">{item}</p>
             </div>
           ))}
+        </div>
+        <div className="testimonials-actions">
+          <a href="#booking" className="testimonials-link-cta">
+            Get a Free Quote
+          </a>
         </div>
       </div>
     </section>

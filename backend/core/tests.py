@@ -50,7 +50,7 @@ class PromotionAndBookingFlowTests(TestCase):
         response = self.client.get("/api/promotion/")
         self.assertEqual(response.status_code, 404)
 
-    @override_settings(DEFAULT_VAT_RATE=0.15, APPLY_VAT_BY_DEFAULT=True)
+    @override_settings(DEFAULT_VAT_RATE=0.20, APPLY_VAT_BY_DEFAULT=True)
     def test_booking_creation_applies_promo_and_vat(self):
         """Booking API should apply promo discount and VAT correctly."""
         # Create an active promotion whose code will be auto-applied on the frontend
@@ -93,13 +93,13 @@ class PromotionAndBookingFlowTests(TestCase):
         # 10% discount -> subtotal 90.00
         self.assertEqual(booking.subtotal, Decimal("90.00"))
 
-        # VAT 15% of 90.00 -> 13.50, total -> 103.50
-        self.assertEqual(booking.vat_amount.quantize(Decimal("0.01")), Decimal("13.50"))
+        # VAT 20% of 90.00 -> 18.00, total -> 108.00
+        self.assertEqual(booking.vat_amount.quantize(Decimal("0.01")), Decimal("18.00"))
         self.assertEqual(
-            booking.total_with_vat.quantize(Decimal("0.01")), Decimal("103.50")
+            booking.total_with_vat.quantize(Decimal("0.01")), Decimal("108.00")
         )
 
-    @override_settings(DEFAULT_VAT_RATE=0.15, APPLY_VAT_BY_DEFAULT=True)
+    @override_settings(DEFAULT_VAT_RATE=0.20, APPLY_VAT_BY_DEFAULT=True)
     def test_booking_creation_without_promo_still_applies_vat(self):
         """Booking API should calculate VAT even when no promo code is used."""
         preferred_date = (timezone.now().date() + timezone.timedelta(days=1)).isoformat()
@@ -127,11 +127,48 @@ class PromotionAndBookingFlowTests(TestCase):
         self.assertEqual(booking.estimated_price, Decimal("100.00"))
         self.assertEqual(booking.subtotal, Decimal("100.00"))
 
-        # VAT 15% of 100.00 -> 15.00, total -> 115.00
-        self.assertEqual(booking.vat_amount.quantize(Decimal("0.01")), Decimal("15.00"))
+        # VAT 20% of 100.00 -> 20.00, total -> 120.00
+        self.assertEqual(booking.vat_amount.quantize(Decimal("0.01")), Decimal("20.00"))
         self.assertEqual(
-            booking.total_with_vat.quantize(Decimal("0.01")), Decimal("115.00")
+            booking.total_with_vat.quantize(Decimal("0.01")), Decimal("120.00")
         )
+
+    @override_settings(DEFAULT_VAT_RATE=0.20, APPLY_VAT_BY_DEFAULT=True)
+    def test_vat_config_endpoint_returns_live_settings(self):
+        response = self.client.get("/api/vat-config/")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["default_vat_rate"], 0.2)
+        self.assertEqual(data["vat_rate_percent"], 20.0)
+        self.assertTrue(data["apply_vat_by_default"])
+        self.assertEqual(data["currency"], "GBP")
+        self.assertFalse(data["prices_include_vat"])
+
+    def test_health_endpoint_returns_ok(self):
+        response = self.client.get("/api/health/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "ok")
+
+    @override_settings(DEFAULT_VAT_RATE=0.20, APPLY_VAT_BY_DEFAULT=True)
+    def test_booking_create_response_includes_vat_config(self):
+        preferred_date = (timezone.now().date() + timezone.timedelta(days=1)).isoformat()
+        data = {
+            "name": "API Config Test",
+            "email": "cfg@example.com",
+            "phone": "1234567890",
+            "service": self.service.id,
+            "job_type": "residential",
+            "billing_type": "fixed",
+            "preferred_date": preferred_date,
+            "preferred_time_window": "Morning (8am-12pm)",
+            "address": "1 Test St",
+            "notes": "",
+        }
+        response = self.client.post("/api/bookings/", data)
+        self.assertEqual(response.status_code, 201)
+        body = response.json()
+        self.assertIn("vat_config", body)
+        self.assertEqual(body["vat_config"]["default_vat_rate"], 0.2)
 
 
 class AdminActionsTests(TestCase):
@@ -164,8 +201,8 @@ class AdminActionsTests(TestCase):
             promo_code="SPRING10",
             promo_discount=Decimal("10.0"),
             subtotal=Decimal("90.00"),
-            vat_amount=Decimal("13.50"),
-            total_with_vat=Decimal("103.50"),
+            vat_amount=Decimal("18.00"),
+            total_with_vat=Decimal("108.00"),
         )
 
     def test_generate_receipts_creates_invoice_for_booking(self):

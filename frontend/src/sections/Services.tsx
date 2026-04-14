@@ -22,6 +22,15 @@ const getServiceImage = (service: Service) => {
 };
 
 const Services = () => {
+  const scrollToBooking = () => {
+    const el = document.getElementById('booking');
+    if (!el) return;
+    const prefersReduced =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth' });
+  };
+
   const { ref, isVisible } = useScrollAnimation();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,32 +41,37 @@ const Services = () => {
         const data = await getServices();
         setServices(data.filter(s => s.is_active).slice(0, 3));
       } catch (error) {
-        console.error('Failed to fetch services:', error);
+        if (import.meta.env.DEV) {
+          console.error('Failed to fetch services:', error);
+        }
         // Fallback to default services if API fails
         setServices([
           {
             id: 1,
-            name: 'Residential Cleaning',
+            name: 'Home Cleaning',
             slug: 'residential-cleaning',
-            short_description: 'Experience a sparkling home with our thorough residential cleaning services.',
+            short_description:
+              'Routine, deep, and move-in/move-out cleaning for apartments and homes.',
             long_description: '',
             is_active: true,
             display_order: 1,
           },
           {
             id: 2,
-            name: 'Commercial Cleaning',
-            slug: 'commercial-cleaning',
-            short_description: 'Keep your business spotless with our professional commercial cleaning solutions.',
+            name: 'Office Cleaning',
+            slug: 'office-cleaning',
+            short_description:
+              'Clean, organized workspaces that support staff wellbeing and productivity.',
             long_description: '',
             is_active: true,
             display_order: 2,
           },
           {
             id: 3,
-            name: 'Carpet Cleaning',
-            slug: 'carpet-cleaning',
-            short_description: 'Deep clean and restore your carpets to their original beauty.',
+            name: 'Commercial Cleaning',
+            slug: 'commercial-cleaning',
+            short_description:
+              'Flexible cleaning plans for shops, clinics, and shared facilities.',
             long_description: '',
             is_active: true,
             display_order: 3,
@@ -88,13 +102,11 @@ const Services = () => {
     <section id="services" ref={ref as React.RefObject<HTMLElement>} className={`section services-section ${isVisible ? 'animate-in' : ''}`}>
       <div className="container">
         <div className="services-header">
-          <span className="section-title">Our Services</span>
-          <h2>Professional Cleaning Solutions for Homes and Businesses</h2>
+          <span className="section-title">SERVICES</span>
+          <h2>Cleaning Services Designed Around You</h2>
           <p className="services-description">
-            We provide professional residential and commercial cleaning services, including deep
-            cleaning, carpet cleaning, window cleaning, office cleaning, and post-construction
-            cleaning. Every service is designed to keep your property spotless, hygienic, and
-            welcoming.
+            From homes to shared workplaces, we build service plans around your priorities, timing,
+            and budget.
           </p>
         </div>
 
@@ -115,7 +127,7 @@ const Services = () => {
                   <h3 className="service-title">{service.name}</h3>
                   <p className="service-description">{service.short_description}</p>
                   <a href="#" className="service-link">
-                    LEARN MORE →
+                    View details →
                   </a>
                 </div>
               </div>
@@ -124,7 +136,7 @@ const Services = () => {
         )}
 
         <div className="services-list-wrapper">
-          <h3 className="services-list-title">Our list of cleaning services</h3>
+          <h3 className="services-list-title">Additional service options</h3>
           <ol className="services-list">
             {coreServices.map((item, index) => (
               <li key={item} className="services-list-item">
@@ -136,13 +148,26 @@ const Services = () => {
         </div>
 
         <div className="services-footer">
+          <button type="button" className="btn btn-primary" onClick={scrollToBooking}>
+            Get a Free Quote
+          </button>
           <button
-            className="btn btn-outline"
+            type="button"
+            className="btn btn-outline services-footer-secondary"
             onClick={() => {
               window.location.href = '/services';
             }}
           >
-            View All Cleaning Services
+            View Services
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline services-footer-secondary"
+            onClick={() => {
+              window.location.href = '/pricing';
+            }}
+          >
+            See pricing
           </button>
         </div>
       </div>

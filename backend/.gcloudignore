@@ -1,0 +1,21 @@
+# Reduce build context when submitting backend only (e.g. scripts/deploy-gcp.sh)
+
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.venv
+venv
+*.egg-info
+.eggs
+*.egg
+.env
+.env.*
+*.sqlite3
+db.sqlite3
+*.log
+.pytest_cache
+.mypy_cache
+.git
+.gitignore
+*.md

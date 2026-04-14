@@ -1,7 +1,29 @@
+import { useEffect, useState } from 'react';
 import './Hero.css';
 import heroFloorCleaning from '../assets/hero-floor-cleaning.png';
 
 const Hero = () => {
+  const trustHighlights = [
+    'Background-checked team',
+    'Eco-conscious products available',
+    'Flexible scheduling',
+    'Quality-check follow-up',
+  ];
+  const [activeTrustIndex, setActiveTrustIndex] = useState(0);
+
+  useEffect(() => {
+    const prefersReduced =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const intervalId = window.setInterval(() => {
+      setActiveTrustIndex((prev) => (prev + 1) % trustHighlights.length);
+    }, 2600);
+
+    return () => window.clearInterval(intervalId);
+  }, [trustHighlights.length]);
+
   const scrollToBooking = () => {
     const element = document.getElementById('booking');
     if (element) {
@@ -20,26 +42,40 @@ const Hero = () => {
     <section id="hero" className="hero">
       <div className="container hero-container">
         <div className="hero-content">
-          <h1 className="hero-headline">
-            Professional Cleaning Services for a{' '}
-            <span className="hero-highlight">Healthier, Happier Space</span>.
-          </h1>
+          <h1 className="hero-headline">Professional Cleaning, Delivered with Care</h1>
           <p className="hero-subheadline">
-            Experience spotless residential and commercial cleaning services that keep your spaces
-            fresh, hygienic, and beautifully maintained. From routine cleans to deep cleaning and
-            carpets, Afri Cleans helps create a cleaner space and a healthier lifestyle for you.
-          </p>
-          <p className="hero-services-inline">
-            Residential cleaning • Commercial cleaning • Carpet cleaning • Window cleaning • Deep
-            cleaning • Post-construction cleaning
+            Afri Cleans helps homes and businesses stay fresh, healthy, and ready for what matters
+            most. Reliable service, clear communication, and attention to detail from day one.
           </p>
           <div className="hero-cta">
             <button className="btn btn-primary hero-cta-primary" onClick={scrollToBooking}>
-              Book Your Cleaning Today →
+              Get a Free Quote
             </button>
             <button className="btn btn-secondary hero-cta-secondary" onClick={scrollToServices}>
-              View Cleaning Services
+              View Services
             </button>
+          </div>
+          <div className="hero-trust-carousel" aria-label="Trust highlights">
+            <div className="hero-trust-track">
+              {trustHighlights.map((item, index) => (
+                <div
+                  key={item}
+                  className={`hero-trust-slide ${activeTrustIndex === index ? 'is-active' : ''}`}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+            <div className="hero-trust-dots" aria-hidden>
+              {trustHighlights.map((item, index) => (
+                <button
+                  key={`${item}-dot`}
+                  type="button"
+                  className={`hero-trust-dot ${activeTrustIndex === index ? 'is-active' : ''}`}
+                  onClick={() => setActiveTrustIndex(index)}
+                />
+              ))}
+            </div>
           </div>
         </div>
         <div className="hero-image">

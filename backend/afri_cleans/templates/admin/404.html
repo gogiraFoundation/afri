@@ -1,0 +1,22 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Page not found" %} | Afri Cleans Admin{% endblock %}
+
+{% block content %}
+  <div class="afri-admin-error-page">
+    <h1>{% trans "We couldn’t find that page" %}</h1>
+    <p>
+      {% trans "The page you requested does not exist in the Afri Cleans admin." %}
+    </p>
+    <p class="afri-admin-error-meta">
+      {% trans "If you followed a link from inside the admin, please go back or return to the dashboard." %}
+    </p>
+    <p>
+      <a href="{% url 'admin:index' %}" class="button default">
+        {% trans "Back to Admin Dashboard" %}
+      </a>
+    </p>
+  </div>
+{% endblock %}
+

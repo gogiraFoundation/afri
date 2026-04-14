@@ -13,21 +13,52 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 
+import dj_database_url
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from a local .env file (for development).
+# In production, real environment variables (for example from "secrets") will override these.
+load_dotenv(BASE_DIR / ".env")
+
+# Environment: used to drive security-sensitive defaults
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development").lower()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4i%yaqdm3z7!82143z7mn$^@n)@bmb4_l%bwsq8nqk(jfxnp!u'
+# Must be provided via environment (for local dev, via .env).
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable is required")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG is controlled by environment; if not explicitly set, it is OFF in production.
+DEBUG = os.environ.get(
+    'DEBUG',
+    'False' if ENVIRONMENT == 'production' else 'True',
+).lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    if h.strip()
+]
 
+# For security, never allow wildcard hosts in production
+if ENVIRONMENT == 'production' and '*' in os.environ.get('ALLOWED_HOSTS', ''):
+    raise ValueError("Wildcard ALLOWED_HOSTS is not permitted in production")
+
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if o.strip()
+]
+
+
+# Default primary key for models without explicit PK (avoids Django 3.2+ warnings)
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Application definition
 
@@ -45,6 +76,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -52,6 +84,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'afri_cleans.middleware.ApiJsonExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'afri_cleans.urls'
@@ -77,12 +110,17 @@ WSGI_APPLICATION = 'afri_cleans.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600),
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -119,38 +157,122 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
 
 # CORS Settings
+# Configure allowed origins via CORS_ALLOWED_ORIGINS env var
+# e.g. CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    o.strip()
+    for o in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+    if o.strip()
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Production security (HTTPS, cookies, HSTS). Tune via environment when behind a reverse proxy.
+if ENVIRONMENT == 'production':
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get(
+        'SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True'
+    ).lower() == 'true'
+    SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() == 'true'
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+    if os.environ.get('TRUST_X_FORWARDED_PROTO', '').lower() == 'true':
+        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # REST Framework Settings
 REST_FRAMEWORK = {
+    # Default to authenticated-only API; public endpoints must explicitly override
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 100,
+    # Consistent JSON error responses for API endpoints
+    'EXCEPTION_HANDLER': 'afri_cleans.api_errors.custom_exception_handler',
 }
 
 # Email Settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development
-DEFAULT_FROM_EMAIL = 'noreply@africleans.com'
-ADMIN_EMAIL = 'admin@africleans.com'
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend',  # sensible default for dev
+)
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@example.com')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
 
-# For production, configure SMTP settings via environment variables:
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = os.environ.get('EMAIL_HOST')
-# EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+# Optional SMTP configuration for non-console backends
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # VAT/Tax Configuration
-DEFAULT_VAT_RATE = float(os.environ.get('DEFAULT_VAT_RATE', '0.15'))  # 15% default
+def _get_decimal_rate(env_key: str, default: str) -> float:
+    """Parse decimal rate from env and enforce 0..1 inclusive bounds."""
+    raw_value = os.environ.get(env_key, default)
+    try:
+        parsed = float(raw_value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{env_key} must be a decimal number between 0 and 1") from exc
+    if parsed < 0 or parsed > 1:
+        raise ValueError(f"{env_key} must be between 0 and 1")
+    return parsed
+
+
+DEFAULT_VAT_RATE = _get_decimal_rate('DEFAULT_VAT_RATE', '0.20')  # UK standard VAT default
 APPLY_VAT_BY_DEFAULT = os.environ.get('APPLY_VAT_BY_DEFAULT', 'True').lower() == 'true'
+
+# Logging configuration
+# Avoid logging request bodies or sensitive fields; send structured logs to stdout
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "format": '{"level":"%(levelname)s","logger":"%(name)s","message":"%(message)s"}',
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": LOG_LEVEL,
+    },
+    "loggers": {
+        # Keep Django request logs but avoid including full request bodies
+        "django.request": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        # Application-level logging (e.g. core.views)
+        "core": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+    },
+}

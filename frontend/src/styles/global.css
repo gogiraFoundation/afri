@@ -216,3 +216,33 @@ a:hover {
   outline-offset: 2px;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .services-section,
+  .about-section {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .btn-outline:hover,
+  .service-card:hover {
+    transform: none !important;
+  }
+}
+
+/* Fixed navbar overlays content; satellite page heroes need extra top padding */
+.pricing-hero.section,
+.services-page-hero.section,
+.blog-topics-hero.section,
+.google-maps-hero.section,
+.local-seo-hero.section {
+  padding-top: calc(4.5rem + var(--spacing-2xl));
+}
+
+

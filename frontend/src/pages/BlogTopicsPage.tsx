@@ -60,14 +60,14 @@ const BlogTopicsPage = () => {
         <div className="container blog-topics-hero-container">
           <div className="blog-topics-hero-content">
             <span className="section-title">Cleaning Tips & Guides</span>
-            <h1>Cleaning Blog Topics That Attract the Right Clients</h1>
+            <h1>Cleaning Topics and Practical Guides</h1>
             <p>
-              These <strong>30 SEO-optimized blog topics</strong> are designed to rank on Google and bring in
-              homeowners and businesses searching for professional cleaning advice and services.
+              Explore practical topics that help homeowners and businesses maintain cleaner, healthier
+              spaces.
             </p>
             <div className="blog-topics-hero-actions">
               <button className="btn btn-primary" onClick={goToBooking}>
-                Book a Cleaning →
+                Get a Free Quote
               </button>
               <button className="btn btn-outline" onClick={goToBrochure}>
                 Download Service Brochure
@@ -77,13 +77,13 @@ const BlogTopicsPage = () => {
         </div>
       </header>
 
-      <main>
+      <div className="page-content">
         <section className="section blog-topics-section">
           <div className="container">
             <h2>30 SEO Blog Articles for Cleaning Services</h2>
             <p className="blog-topics-intro">
-              Use these topics to build a content library around residential cleaning, office cleaning, carpet care,
-              eco-friendly solutions, and more. Each idea targets <strong>high-intent, high-traffic keywords</strong>.
+              These topics cover residential cleaning, office cleaning, carpet care, and eco-conscious
+              practices for everyday maintenance.
             </p>
 
             <ol className="blog-topics-list">
@@ -112,7 +112,7 @@ const BlogTopicsPage = () => {
               </p>
               <div className="blog-topics-hero-actions">
                 <button className="btn btn-primary" onClick={goToBooking}>
-                  Get Your Free Estimate →
+                  Get a Free Quote
                 </button>
                 <button className="btn btn-outline" onClick={goToBrochure}>
                   View Our Services Brochure
@@ -121,7 +121,7 @@ const BlogTopicsPage = () => {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 };

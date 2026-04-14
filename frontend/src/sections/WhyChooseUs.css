@@ -32,15 +32,33 @@
 
 .why-choose-actions {
   margin-top: var(--spacing-lg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.why-choose-actions .btn {
+  font-size: 0.67rem;
+  padding: 0.58rem 1.17rem;
+  min-width: 8.5rem;
+}
+
+.why-choose-actions .btn + .btn {
+  margin-left: 0.25rem;
 }
 
 .feature-item {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
   font-size: 1.125rem;
   color: var(--color-text-dark);
+  text-align: center;
 }
 
 .feature-check {

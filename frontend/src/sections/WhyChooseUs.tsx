@@ -2,27 +2,24 @@ import './WhyChooseUs.css';
 import lobbyFloorMopping from '../assets/lobby-floor-mopping.png';
 
 const WhyChooseUs = () => {
-  const stats = [
-    { number: '300+', label: 'Happy Clients' },
-    { number: '8756+', label: 'Homes Cleaned' },
-    { number: '300+', label: 'Corporate Spaces' },
-    { number: '300+', label: '5-Star Reviews' },
-  ];
-
   const features = [
-    'Experienced and trained cleaners',
-    'Eco-friendly cleaning products',
-    'Reliable and punctual service',
-    'Customized cleaning plans',
-    'Satisfaction guaranteed',
+    'Personalized cleaning plans for your exact needs',
+    'Trained professionals who respect your space',
+    'Optional eco-friendly cleaning products',
+    'Transparent pricing with no hidden surprises',
+    'Easy booking and dependable arrival times',
+    'Quick issue resolution if anything is missed',
   ];
 
-  const handleDownloadBrochure = () => {
-    window.location.href = '/brochure';
+  const handleViewServices = () => {
+    window.location.href = '/services';
   };
 
-  const handleViewPricing = () => {
-    window.location.href = '/pricing';
+  const handleGetQuote = () => {
+    const element = document.getElementById('booking');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -31,14 +28,10 @@ const WhyChooseUs = () => {
         <div className="why-choose-container">
           <div className="why-choose-content">
             <span className="section-title">WHY CHOOSE US</span>
-            <h2>
-              A Cleaning Company You Can Trust with{' '}
-              <span className="brand-highlight">Afri Cleans</span>
-            </h2>
+            <h2>Why Clients Choose Afri Cleans</h2>
             <p className="why-choose-description">
-              Choosing the right cleaning partner makes all the difference. We combine years of
-              experience, trained professionals, eco-friendly products, and attention to detail to
-              deliver exceptional results for homes and businesses.
+              We may be new, but our approach is built on proven cleaning standards: clear
+              expectations, trained teams, and consistent execution.
             </p>
             <ul className="why-choose-features">
               {features.map((feature, index) => (
@@ -49,11 +42,11 @@ const WhyChooseUs = () => {
               ))}
             </ul>
             <div className="why-choose-actions">
-              <button className="btn btn-primary" onClick={handleViewPricing}>
-                View Pricing →
+              <button className="btn btn-primary" onClick={handleGetQuote}>
+                Get a Free Quote
               </button>
-              <button className="btn btn-outline" onClick={handleDownloadBrochure}>
-                Download brochure
+              <button className="btn btn-outline" onClick={handleViewServices}>
+                View Services
               </button>
             </div>
           </div>
@@ -66,13 +59,19 @@ const WhyChooseUs = () => {
               />
             </div>
             <div className="stats-grid">
-              <h3 className="stats-title">Our Impact in Numbers</h3>
-              {stats.map((stat, index) => (
-                <div key={index} className="stat-card">
-                  <div className="stat-number">{stat.number}</div>
-                  <div className="stat-label">{stat.label}</div>
-                </div>
-              ))}
+              <h3 className="stats-title">Built for dependable service</h3>
+              <div className="stat-card">
+                <div className="stat-label">Clear scope before every visit</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">Professional teams and careful handling</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">Flexible scheduling for homes and businesses</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-label">Follow-up support if anything is missed</div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 // API Client for Afri Cleans
-import type { Service, Booking, BookingFormData, ContactRequest, ContactFormData, Promotion, BlogPost } from '../types/api';
+import type { Service, Booking, BookingFormData, ContactRequest, ContactFormData, Promotion, BlogPost, VATConfig } from '../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -20,26 +20,45 @@ export async function apiRequest<T>(
   const response = await fetch(url, config);
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'An error occurred' }));
-    throw new Error(error.detail || error.message || `HTTP error! status: ${response.status}`);
+    const errorPayload: unknown = await response.json().catch(() => ({ detail: 'An error occurred' }));
+    const detail =
+      errorPayload &&
+      typeof errorPayload === 'object' &&
+      'detail' in errorPayload &&
+      typeof (errorPayload as { detail: unknown }).detail === 'string'
+        ? (errorPayload as { detail: string }).detail
+        : undefined;
+    const message =
+      errorPayload &&
+      typeof errorPayload === 'object' &&
+      'message' in errorPayload &&
+      typeof (errorPayload as { message: unknown }).message === 'string'
+        ? (errorPayload as { message: string }).message
+        : undefined;
+    throw new Error(detail || message || `HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
+}
+
+function extractList<T>(data: unknown): T[] {
+  if (Array.isArray(data)) {
+    return data as T[];
+  }
+  if (
+    data &&
+    typeof data === 'object' &&
+    'results' in data &&
+    Array.isArray((data as { results: unknown }).results)
+  ) {
+    return (data as { results: T[] }).results;
+  }
+  return [];
 }
 
 export async function getServices(): Promise<Service[]> {
-  const data = await apiRequest<any>('/services/');
-
-  // Handle both plain list and DRF paginated response
-  if (Array.isArray(data)) {
-    return data as Service[];
-  }
-
-  if (data && Array.isArray(data.results)) {
-    return data.results as Service[];
-  }
-
-  return [];
+  const data: unknown = await apiRequest<unknown>('/services/');
+  return extractList<Service>(data);
 }
 
 export async function createBooking(data: BookingFormData): Promise<Booking> {
@@ -59,24 +78,19 @@ export async function createContactRequest(data: ContactFormData): Promise<Conta
 export async function getActivePromotion(): Promise<Promotion | null> {
   try {
     return await apiRequest<Promotion>('/promotion/');
-  } catch (error) {
+  } catch {
     // Return null if no active promotion
     return null;
   }
 }
 
+export async function getVATConfig(): Promise<VATConfig> {
+  return apiRequest<VATConfig>('/vat-config/');
+}
+
 export async function getBlogPosts(): Promise<BlogPost[]> {
-  const data = await apiRequest<any>('/blog-posts/');
-
-  if (Array.isArray(data)) {
-    return data as BlogPost[];
-  }
-
-  if (data && Array.isArray(data.results)) {
-    return data.results as BlogPost[];
-  }
-
-  return [];
+  const data: unknown = await apiRequest<unknown>('/blog-posts/');
+  return extractList<BlogPost>(data);
 }
 
 export async function getBlogPost(slug: string): Promise<BlogPost> {

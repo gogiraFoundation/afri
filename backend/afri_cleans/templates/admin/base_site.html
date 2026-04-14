@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}Afri Cleans Admin | {% trans 'Django site admin' %}{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="icon" href="{% static 'favicon.ico' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'admin/css/afri_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div class="afri-admin-branding">
+  <div class="afri-admin-logo">
+    {# Placeholder for future logo image. Update src when you have a real logo file. #}
+    <span class="afri-admin-logo-mark">AC</span>
+    <span class="afri-admin-logo-text">Afri Cleans</span>
+  </div>
+  <div class="afri-admin-subtitle">
+    <span>Operations &amp; Billing Console</span>
+  </div>
+{% endblock %}
+
+{% block nav-global %}
+  <div class="afri-admin-nav-global">
+    {{ block.super }}
+  </div>
+</div>
+{% endblock %}
+

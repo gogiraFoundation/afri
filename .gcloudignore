@@ -1,0 +1,44 @@
+# Reduce Cloud Build upload size (gcloud builds submit / Cloud Build trigger).
+# See https://cloud.google.com/build/docs/configuring-builds/submit-build-config#gcloudignore
+
+.git
+.gitignore
+.gcloudignore
+
+# Frontend (not needed for Django backend image)
+frontend/
+
+# Python
+**/__pycache__
+**/.venv
+**/venv
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/.mypy_cache
+**/*.egg-info
+**/.eggs
+**/*.egg
+
+# Node (if any in root)
+node_modules/
+
+# IDE & OS
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+
+# Env and secrets (do not upload)
+.env
+.env.*
+*.sqlite3
+db.sqlite3
+*.log
+media/
+staticfiles/
+
+# Docs and plans (optional, keep if you want them in image context)
+# .cursor/
+# *.md

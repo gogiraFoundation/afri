@@ -33,7 +33,9 @@ const BlogPostPage = ({ slug }: BlogPostPageProps) => {
           }
         }
       } catch (err) {
-        console.error('Failed to load blog post', err);
+        if (import.meta.env.DEV) {
+          console.error('Failed to load blog post', err);
+        }
         setError('Sorry, this article could not be found.');
       } finally {
         setLoading(false);

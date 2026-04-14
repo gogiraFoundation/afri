@@ -151,6 +151,22 @@ For production, update this to your backend API URL.
 4. Make changes to frontend/backend code
 5. Changes will hot-reload automatically
 
+## Deploying to Google Cloud Run
+
+The Django backend can be deployed to **Google Cloud Run** using the manual deploy script or Cloud Build CI/CD. See **[DEPLOY.md](DEPLOY.md)** for:
+
+- Prerequisites (gcloud, billing, APIs)
+- One-time setup (project, env vars, SECRET_KEY)
+- Manual deploy: `./scripts/deploy-gcp.sh`
+- CI/CD: Cloud Build trigger and `cloudbuild.yaml`
+
+## Admin Theming (Afri Cleans Brand)
+
+- The Django admin is branded using custom templates and CSS:
+  - Templates: `backend/afri_cleans/templates/admin/base_site.html`, `backend/afri_cleans/templates/admin/404.html`, `backend/afri_cleans/templates/admin/500.html`
+  - CSS: `backend/afri_cleans/static/admin/css/afri_admin.css`
+- To swap in the real Afri Cleans logo later, update the placeholder in `base_site.html` (inside `.afri-admin-logo`) to reference your logo image served from static files.
+
 ## Building for Production
 
 ### Frontend

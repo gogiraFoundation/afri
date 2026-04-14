@@ -26,6 +26,7 @@
   color: var(--color-primary-dark);
   cursor: pointer;
   transition: color var(--transition-fast);
+  text-decoration: none;
 }
 
 .navbar-logo:hover {
@@ -77,6 +78,11 @@
   font-size: 0.9rem;
   color: var(--color-text-light);
   font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.navbar-phone:hover {
+  color: var(--color-primary-medium-2);
 }
 
 .navbar-cta {

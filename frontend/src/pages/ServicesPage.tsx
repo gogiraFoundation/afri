@@ -3,7 +3,7 @@ import './ServicesPage.css';
 
 const ServicesPage = () => {
   useEffect(() => {
-    document.title = 'Professional Cleaning Services | Residential & Commercial Cleaning | Afri Cleans';
+    document.title = 'Cleaning Services | Afri Cleans';
   }, []);
 
   const goToBooking = () => {
@@ -20,16 +20,14 @@ const ServicesPage = () => {
         <div className="container services-page-hero-container">
           <div className="services-page-hero-content">
             <span className="section-title">Cleaning Services</span>
-            <h1>Professional Cleaning Services You Can Trust</h1>
+            <h1>Cleaning Services Designed Around You</h1>
             <p>
-              At <strong>Afri Cleans</strong>, we offer a complete range of{' '}
-              <strong>professional cleaning services</strong> designed to keep your home or business spotless,
-              hygienic, and welcoming. Our trained cleaning specialists use modern equipment and safe cleaning
-              products to deliver exceptional results.
+              Afri Cleans supports homes and businesses with practical service options, clear scopes,
+              and dependable scheduling.
             </p>
             <div className="services-page-hero-actions">
               <button className="btn btn-primary" onClick={goToBooking}>
-                Book Your Cleaning Today →
+                Get a Free Quote
               </button>
               <button className="btn btn-outline" onClick={callNow}>
                 Call Us: (+012) 87059897
@@ -39,14 +37,14 @@ const ServicesPage = () => {
         </div>
       </header>
 
-      <main>
+      <div className="page-content">
         <section className="section services-page-section">
           <div className="container services-page-grid">
             <article className="services-page-card">
               <h2>Residential Cleaning Services</h2>
               <p>
-                A clean home promotes comfort, relaxation, and better health. Our residential cleaning services are
-                tailored to fit your lifestyle, schedule, and space.
+                Routine and deep cleaning support for apartments and homes, tailored to your layout
+                and priorities.
               </p>
               <h3>What&apos;s included</h3>
               <ul>
@@ -70,8 +68,8 @@ const ServicesPage = () => {
             <article className="services-page-card">
               <h2>Commercial Cleaning Services</h2>
               <p>
-                A clean workplace improves productivity and creates a positive impression on clients. We keep your
-                business environment spotless, safe, and professional.
+                Flexible cleaning plans for shops, clinics, and shared facilities with consistent
+                scheduling.
               </p>
               <h3>Ideal for</h3>
               <ul>
@@ -114,7 +112,7 @@ const ServicesPage = () => {
             <article className="services-page-card">
               <h2>Carpet Cleaning Services</h2>
               <p>
-                Our professional carpet cleaning removes deep-down dirt and buildup to refresh and protect your carpets.
+                Detailed carpet cleaning to refresh high-traffic rooms and reduce buildup.
               </p>
               <h3>We help remove</h3>
               <ul>
@@ -138,8 +136,7 @@ const ServicesPage = () => {
             <article className="services-page-card">
               <h2>Window Cleaning Services</h2>
               <p>
-                We deliver streak-free window cleaning that improves natural light and elevates the overall look of
-                your property.
+                Interior and exterior window cleaning that helps maintain a clean, bright space.
               </p>
               <h3>Includes</h3>
               <ul>
@@ -176,8 +173,8 @@ const ServicesPage = () => {
             <div className="services-page-eco-content">
               <h2>Eco-Friendly Cleaning Options</h2>
               <p>
-                We also offer <strong>eco-friendly cleaning solutions</strong> using safe, biodegradable products that
-                protect your health and the environment.
+                Eco-conscious cleaning products are available when you want to reduce harsh chemical
+                use in your space.
               </p>
               <p>
                 Choose green cleaning for families with children, pets, or allergies, or for workplaces that prioritize
@@ -194,7 +191,7 @@ const ServicesPage = () => {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 };
