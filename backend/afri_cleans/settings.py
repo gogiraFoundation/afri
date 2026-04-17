@@ -19,12 +19,13 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from a local .env file (for development).
-# In production, real environment variables (for example from "secrets") will override these.
-load_dotenv(BASE_DIR / ".env")
-
 # Environment: used to drive security-sensitive defaults
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development").lower()
+
+# Load environment variables from a local .env file (for development).
+# In production we avoid loading .env implicitly to prevent fallback secrets.
+if ENVIRONMENT != "production":
+    load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -42,14 +43,19 @@ DEBUG = os.environ.get(
     'False' if ENVIRONMENT == 'production' else 'True',
 ).lower() == 'true'
 
-ALLOWED_HOSTS = [
-    h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-    if h.strip()
-]
+allowed_hosts_env = os.environ.get('ALLOWED_HOSTS')
+if allowed_hosts_env is None and ENVIRONMENT != 'production':
+    allowed_hosts_env = 'localhost,127.0.0.1'
+
+ALLOWED_HOSTS = [h.strip() for h in (allowed_hosts_env or '').split(',') if h.strip()]
 
 # For security, never allow wildcard hosts in production
 if ENVIRONMENT == 'production' and '*' in os.environ.get('ALLOWED_HOSTS', ''):
     raise ValueError("Wildcard ALLOWED_HOSTS is not permitted in production")
+if ENVIRONMENT == 'production' and not ALLOWED_HOSTS:
+    raise ValueError("ALLOWED_HOSTS must be set in production")
+if ENVIRONMENT == 'production' and DEBUG:
+    raise ValueError("DEBUG must be False in production")
 
 CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
@@ -182,17 +188,26 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Production security (HTTPS, cookies, HSTS). Tune via environment when behind a reverse proxy.
 if ENVIRONMENT == 'production':
+    SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = os.environ.get('SESSION_COOKIE_SAMESITE', 'Lax')
+    CSRF_COOKIE_HTTPONLY = os.environ.get('CSRF_COOKIE_HTTPONLY', 'False').lower() == 'true'
     CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = os.environ.get('CSRF_COOKIE_SAMESITE', 'Lax')
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = 'DENY'
+    SECURE_REFERRER_POLICY = os.environ.get('SECURE_REFERRER_POLICY', 'strict-origin-when-cross-origin')
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = os.environ.get(
+        'SECURE_CROSS_ORIGIN_OPENER_POLICY',
+        'same-origin',
+    )
     SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get(
         'SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True'
     ).lower() == 'true'
-    SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() == 'true'
-    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+    SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'True').lower() == 'true'
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() == 'true'
     if os.environ.get('TRUST_X_FORWARDED_PROTO', '').lower() == 'true':
         SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -206,7 +221,22 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100,
     # Consistent JSON error responses for API endpoints
     'EXCEPTION_HANDLER': 'afri_cleans.api_errors.custom_exception_handler',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': os.environ.get('DRF_THROTTLE_ANON', '120/hour'),
+        'user': os.environ.get('DRF_THROTTLE_USER', '500/hour'),
+        'booking_create': os.environ.get('DRF_THROTTLE_BOOKING_CREATE', '6/hour'),
+        'contact_create': os.environ.get('DRF_THROTTLE_CONTACT_CREATE', '5/hour'),
+    },
 }
+
+# Optional anti-bot captcha validation for public POST forms.
+# Leave empty to keep captcha checks disabled (soft rollout).
+CONTACT_FORM_CAPTCHA_SECRET = os.environ.get('CONTACT_FORM_CAPTCHA_SECRET', '').strip()
 
 # Email Settings
 EMAIL_BACKEND = os.environ.get(

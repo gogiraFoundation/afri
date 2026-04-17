@@ -1,3 +1,10 @@
+from datetime import timedelta
+import json
+from urllib import parse, request
+
+from django.conf import settings
+from django.core.cache import cache
+from django.utils import timezone
 from rest_framework import serializers
 from .models import Service, Booking, ContactRequest, Promotion, Invoice, BlogPost
 from .utils import calculate_booking_pricing, get_vat_config_payload
@@ -14,6 +21,18 @@ class ServiceSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     service_name = serializers.CharField(source='service.name', read_only=True)
     vat_config = serializers.SerializerMethodField()
+    honeypot = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        write_only=True,
+        trim_whitespace=True,
+    )
+    captcha_token = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        write_only=True,
+        trim_whitespace=True,
+    )
 
     class Meta:
         model = Booking
@@ -40,6 +59,8 @@ class BookingSerializer(serializers.ModelSerializer):
             'vat_config',
             'status',
             'created_at',
+            'honeypot',
+            'captcha_token',
         ]
         read_only_fields = [
             'id',
@@ -61,8 +82,55 @@ class BookingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Preferred date cannot be in the past.")
         return value
 
+    def validate_honeypot(self, value):
+        if value:
+            raise serializers.ValidationError("Invalid submission.")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        self._validate_captcha(attrs.get('captcha_token', ''))
+        self._validate_recent_duplicate(attrs)
+        return attrs
+
+    def _validate_captcha(self, token):
+        secret = settings.CONTACT_FORM_CAPTCHA_SECRET
+        if not secret:
+            return
+        if not token:
+            raise serializers.ValidationError({"captcha_token": "Captcha validation failed."})
+
+        payload = parse.urlencode({"secret": secret, "response": token}).encode()
+        req = request.Request(
+            "https://www.google.com/recaptcha/api/siteverify",
+            data=payload,
+            method="POST",
+        )
+        try:
+            with request.urlopen(req, timeout=3) as response:
+                result = json.loads(response.read().decode("utf-8"))
+        except Exception:
+            raise serializers.ValidationError({"captcha_token": "Captcha validation failed."})
+        if not result.get("success"):
+            raise serializers.ValidationError({"captcha_token": "Captcha validation failed."})
+
+    def _validate_recent_duplicate(self, attrs):
+        window_minutes = int(getattr(settings, "PUBLIC_FORM_DUPLICATE_WINDOW_MINUTES", 10))
+        cutoff = timezone.now() - timedelta(minutes=window_minutes)
+        recent_duplicate = Booking.objects.filter(
+            email__iexact=attrs.get("email", ""),
+            phone=attrs.get("phone", ""),
+            service=attrs.get("service"),
+            preferred_date=attrs.get("preferred_date"),
+            created_at__gte=cutoff,
+        ).exists()
+        if recent_duplicate:
+            raise serializers.ValidationError("Duplicate booking request detected. Please wait before retrying.")
+
     def create(self, validated_data):
         """Automatically calculate an estimated quote, apply promo discount, and calculate VAT."""
+        validated_data.pop('honeypot', None)
+        validated_data.pop('captcha_token', None)
         service = validated_data.get('service')
         pricing = calculate_booking_pricing(
             service_price_from=getattr(service, 'price_from', None),
@@ -128,10 +196,80 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
 
 class ContactRequestSerializer(serializers.ModelSerializer):
+    honeypot = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        write_only=True,
+        trim_whitespace=True,
+    )
+    captcha_token = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        write_only=True,
+        trim_whitespace=True,
+    )
+
     class Meta:
         model = ContactRequest
-        fields = ['id', 'name', 'email', 'phone', 'message', 'handled', 'created_at']
+        fields = [
+            'id',
+            'name',
+            'email',
+            'phone',
+            'message',
+            'handled',
+            'created_at',
+            'honeypot',
+            'captcha_token',
+        ]
         read_only_fields = ['id', 'handled', 'created_at']
+
+    def validate_honeypot(self, value):
+        if value:
+            raise serializers.ValidationError("Invalid submission.")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        self._validate_captcha(attrs.get('captcha_token', ''))
+        self._validate_fingerprint(attrs)
+        return attrs
+
+    def _validate_captcha(self, token):
+        secret = settings.CONTACT_FORM_CAPTCHA_SECRET
+        if not secret:
+            return
+        if not token:
+            raise serializers.ValidationError({"captcha_token": "Captcha validation failed."})
+
+        payload = parse.urlencode({"secret": secret, "response": token}).encode()
+        req = request.Request(
+            "https://www.google.com/recaptcha/api/siteverify",
+            data=payload,
+            method="POST",
+        )
+        try:
+            with request.urlopen(req, timeout=3) as response:
+                result = json.loads(response.read().decode("utf-8"))
+        except Exception:
+            raise serializers.ValidationError({"captcha_token": "Captcha validation failed."})
+        if not result.get("success"):
+            raise serializers.ValidationError({"captcha_token": "Captcha validation failed."})
+
+    def _validate_fingerprint(self, attrs):
+        normalized_email = attrs.get("email", "").strip().lower()
+        normalized_message = " ".join(attrs.get("message", "").split()).lower()
+        fingerprint = f"{normalized_email}:{normalized_message}"
+        cache_key = f"contact_fingerprint:{fingerprint}"
+        if cache.get(cache_key):
+            raise serializers.ValidationError("Duplicate contact request detected. Please wait before retrying.")
+        window_seconds = int(getattr(settings, "PUBLIC_FORM_FINGERPRINT_WINDOW_SECONDS", 300))
+        cache.set(cache_key, True, timeout=window_seconds)
+
+    def create(self, validated_data):
+        validated_data.pop('honeypot', None)
+        validated_data.pop('captcha_token', None)
+        return super().create(validated_data)
 
 
 class BlogPostSerializer(serializers.ModelSerializer):

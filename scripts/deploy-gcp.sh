@@ -14,9 +14,13 @@ REGION="${REGION:-us-central1}"
 SERVICE_NAME="${SERVICE_NAME:-afri-api}"
 IMAGE_NAME="${IMAGE_NAME:-afri-api}"
 
-# Env vars for Cloud Run (set SECRET_KEY and optionally ALLOWED_HOSTS before running, or use --set-env-vars)
-SECRET_KEY="${SECRET_KEY:-}"
-ALLOWED_HOSTS="${ALLOWED_HOSTS:-*}"
+# Env vars for Cloud Run
+# - ALLOWED_HOSTS must be explicitly provided (comma-separated)
+# - SECRET_KEY must be injected via Secret Manager using SECRET_KEY_SECRET
+SECRET_KEY_SECRET="${SECRET_KEY_SECRET:-}"
+ALLOWED_HOSTS="${ALLOWED_HOSTS:-}"
+CSRF_TRUSTED_ORIGINS="${CSRF_TRUSTED_ORIGINS:-}"
+CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS:-}"
 
 usage() {
   echo "Usage: $0 [OPTIONS]"
@@ -28,7 +32,11 @@ usage() {
   echo "  -s, --service NAME  Cloud Run service name (default: afri-api)"
   echo "  -h, --help          Show this help"
   echo ""
-  echo "Environment: GCP_PROJECT_ID, REGION, SERVICE_NAME, IMAGE_NAME, SECRET_KEY, ALLOWED_HOSTS"
+  echo "Environment:"
+  echo "  GCP_PROJECT_ID, REGION, SERVICE_NAME, IMAGE_NAME"
+  echo "  ALLOWED_HOSTS (required)"
+  echo "  CSRF_TRUSTED_ORIGINS, CORS_ALLOWED_ORIGINS (recommended for production)"
+  echo "  SECRET_KEY_SECRET (required; Secret Manager secret name)"
   exit 0
 }
 
@@ -44,6 +52,17 @@ done
 
 if [[ -z "$GCP_PROJECT_ID" ]]; then
   echo "Error: GCP project not set. Use: gcloud config set project PROJECT_ID or set GCP_PROJECT_ID."
+  exit 1
+fi
+
+if [[ -z "$ALLOWED_HOSTS" ]]; then
+  echo "Error: ALLOWED_HOSTS is required and must not contain wildcard values."
+  echo "Example: ALLOWED_HOSTS=api.example.com,afri-api-xyz.a.run.app"
+  exit 1
+fi
+
+if [[ "$ALLOWED_HOSTS" == *"*"* ]]; then
+  echo "Error: wildcard ALLOWED_HOSTS is not allowed."
   exit 1
 fi
 
@@ -64,12 +83,21 @@ echo ""
 echo "Building container image..."
 gcloud builds submit --tag "$IMAGE_URL" "$BACKEND_DIR"
 
-# Build env vars for deploy (SECRET_KEY required in production)
-ENV_VARS="DEBUG=0,ALLOWED_HOSTS=${ALLOWED_HOSTS}"
-if [[ -n "$SECRET_KEY" ]]; then
-  ENV_VARS="${ENV_VARS},SECRET_KEY=${SECRET_KEY}"
+# Build env vars for deploy
+ENV_VARS="DEBUG=0,ENVIRONMENT=production,ALLOWED_HOSTS=${ALLOWED_HOSTS},DJANGO_SETTINGS_MODULE=afri_cleans.settings"
+if [[ -n "$CSRF_TRUSTED_ORIGINS" ]]; then
+  ENV_VARS="${ENV_VARS},CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}"
+fi
+if [[ -n "$CORS_ALLOWED_ORIGINS" ]]; then
+  ENV_VARS="${ENV_VARS},CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}"
+fi
+
+SECRET_ARGS=()
+if [[ -n "$SECRET_KEY_SECRET" ]]; then
+  SECRET_ARGS+=(--set-secrets "SECRET_KEY=${SECRET_KEY_SECRET}:latest")
 else
-  echo "Warning: SECRET_KEY not set. Set it for production (e.g. export SECRET_KEY=your-secret)."
+  echo "Error: provide SECRET_KEY_SECRET (Secret Manager secret name)."
+  exit 1
 fi
 
 echo "Deploying to Cloud Run..."
@@ -78,6 +106,7 @@ gcloud run deploy "$SERVICE_NAME" \
   --region "$REGION" \
   --platform managed \
   --allow-unauthenticated \
+  "${SECRET_ARGS[@]}" \
   --set-env-vars "$ENV_VARS"
 
 SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --region "$REGION" --format 'value(status.url)' 2>/dev/null || true)

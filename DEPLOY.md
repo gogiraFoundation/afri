@@ -26,7 +26,7 @@ This guide covers deploying the **Afri Cleans Django backend** to Google Cloud R
 3. **Set production environment variables on Cloud Run**  
    Do not put secrets in code or in `cloudbuild.yaml`. Configure them once on the Cloud Run service or pass them when deploying:
    - **SECRET_KEY** (required in production): a long random string for Django.
-   - **ALLOWED_HOSTS**: e.g. `*` or your Cloud Run URL (e.g. `https://afri-api-xxxxx.run.app`).
+  - **ALLOWED_HOSTS**: required hostnames only, e.g. `afri-api-xxxxx.run.app,api.example.com` (no wildcard, no `https://`).
    - **CSRF_TRUSTED_ORIGINS** (if your frontend talks to the API): e.g. `https://your-frontend-domain.com`.
    - Optional: `DEBUG=0`, `DEFAULT_VAT_RATE`, `APPLY_VAT_BY_DEFAULT`, etc.
 
@@ -42,11 +42,11 @@ This guide covers deploying the **Afri Cleans Django backend** to Google Cloud R
 From the repository root:
 
 ```bash
-# Set a secret key for production (required)
-export SECRET_KEY="your-long-random-secret-key"
+# Set Secret Manager secret name for production (required)
+export SECRET_KEY_SECRET="afri-django-secret-key"
 
-# Optional: restrict allowed hosts (default is *)
-export ALLOWED_HOSTS="https://afri-api-xxxxx.run.app"
+# Required: allowed hosts (hostnames only; no scheme)
+export ALLOWED_HOSTS="afri-api-xxxxx.run.app"
 
 # Deploy (uses gcloud default project and script defaults)
 ./scripts/deploy-gcp.sh
@@ -60,13 +60,13 @@ export ALLOWED_HOSTS="https://afri-api-xxxxx.run.app"
 | `-r` / `REGION`         | `us-central1`    | Cloud Run region               |
 | `-s` / `SERVICE_NAME`   | `afri-api`       | Cloud Run service name         |
 | `IMAGE_NAME`            | `afri-api`       | Container image name           |
-| `SECRET_KEY`            | (none)           | Django `SECRET_KEY` (set this) |
-| `ALLOWED_HOSTS`         | `*`              | Django `ALLOWED_HOSTS`         |
+| `SECRET_KEY_SECRET`     | (none)           | Secret Manager secret name for Django `SECRET_KEY` |
+| `ALLOWED_HOSTS`         | (required)       | Comma-separated hostnames only (no wildcard, no scheme) |
 
 Example with options:
 
 ```bash
-export SECRET_KEY="your-secret"
+export SECRET_KEY_SECRET="afri-django-secret-key"
 ./scripts/deploy-gcp.sh --project my-gcp-project --region europe-west1 --service afri-api
 ```
 

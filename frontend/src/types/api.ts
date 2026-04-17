@@ -81,6 +81,7 @@ export interface BookingFormData {
   estimated_hours?: number | null;
   promo_code?: string;
   promo_discount?: number | null;
+  honeypot?: string;
 }
 
 export interface ContactFormData {
@@ -88,6 +89,7 @@ export interface ContactFormData {
   email: string;
   phone?: string;
   message: string;
+  honeypot?: string;
 }
 
 export interface BlogPost {

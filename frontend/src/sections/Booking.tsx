@@ -54,6 +54,7 @@ const Booking = () => {
     estimated_hours: null,
     promo_code: '',
     promo_discount: null,
+    honeypot: '',
   });
 
   useEffect(() => {
@@ -207,6 +208,7 @@ const Booking = () => {
         estimated_hours: null,
         promo_code: activePromotion?.promo_code || '',
         promo_discount: activePromotion?.discount_percentage || null,
+        honeypot: '',
       });
     } catch (err) {
       setError(
