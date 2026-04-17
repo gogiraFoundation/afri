@@ -100,9 +100,7 @@ export interface BlogPost {
   content: string;
   seo_title?: string;
   seo_description?: string;
-  is_published: boolean;
   published_at?: string;
   created_at?: string;
-  updated_at?: string;
 }
 

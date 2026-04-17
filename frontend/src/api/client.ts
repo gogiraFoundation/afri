@@ -77,9 +77,13 @@ export async function createContactRequest(data: ContactFormData): Promise<Conta
 
 export async function getActivePromotion(): Promise<Promotion | null> {
   try {
-    return await apiRequest<Promotion>('/promotion/');
+    const data = await apiRequest<Promotion | null>('/promotion/');
+    if (data === null || data === undefined) {
+      return null;
+    }
+    return data;
   } catch {
-    // Return null if no active promotion
+    // Network or server errors: treat like no promotion for banner UX
     return null;
   }
 }

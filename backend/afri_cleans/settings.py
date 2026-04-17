@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -234,9 +235,27 @@ REST_FRAMEWORK = {
     },
 }
 
-# Optional anti-bot captcha validation for public POST forms.
-# Leave empty to keep captcha checks disabled (soft rollout).
+# Optional anti-bot captcha validation for public POST forms (Google reCAPTCHA siteverify).
+# In production, CONTACT_FORM_CAPTCHA_SECRET is required unless you explicitly opt out
+# (see ALLOW_PUBLIC_FORMS_WITHOUT_CAPTCHA) — empty secret means no captcha in non-production only.
 CONTACT_FORM_CAPTCHA_SECRET = os.environ.get('CONTACT_FORM_CAPTCHA_SECRET', '').strip()
+# Explicit opt-out for production when captcha is not wired yet (not recommended long-term).
+ALLOW_PUBLIC_FORMS_WITHOUT_CAPTCHA = os.environ.get(
+    'ALLOW_PUBLIC_FORMS_WITHOUT_CAPTCHA', 'False'
+).lower() == 'true'
+# reCAPTCHA v3: minimum score (0.0–1.0). If unset, 0.5 is used when Google returns a score.
+_recaptcha_min_raw = os.environ.get('RECAPTCHA_MIN_SCORE', '').strip()
+RECAPTCHA_MIN_SCORE = float(_recaptcha_min_raw) if _recaptcha_min_raw else None
+# Optional: hostname must match siteverify response (defense in depth).
+RECAPTCHA_EXPECTED_HOSTNAME = os.environ.get('RECAPTCHA_EXPECTED_HOSTNAME', '').strip()
+
+if ENVIRONMENT == 'production':
+    if not CONTACT_FORM_CAPTCHA_SECRET and not ALLOW_PUBLIC_FORMS_WITHOUT_CAPTCHA:
+        raise ImproperlyConfigured(
+            'Production requires CONTACT_FORM_CAPTCHA_SECRET for public booking/contact '
+            'forms, or set ALLOW_PUBLIC_FORMS_WITHOUT_CAPTCHA=true to acknowledge captcha '
+            'is disabled (not recommended).'
+        )
 
 # Email Settings
 EMAIL_BACKEND = os.environ.get(

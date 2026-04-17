@@ -60,6 +60,7 @@ A modern, responsive website for Afri Cleans featuring a React+TypeScript fronte
    The backend API will be available at `http://localhost:8000`
    - API endpoints: `http://localhost:8000/api/`
    - Admin panel: `http://localhost:8000/admin/`
+   - **Email (development):** The default `EMAIL_BACKEND` is the console backend, so booking and contact notifications print **full message bodies (including PII)** to the terminal. Treat dev logs as sensitive. In production, configure SMTP or a transactional email provider so messages are not dumped to stdout.
 
 ### Frontend Setup
 
@@ -117,6 +118,12 @@ A modern, responsive website for Afri Cleans featuring a React+TypeScript fronte
 - `GET /api/services/` - List all active services
 - `POST /api/bookings/` - Create a new booking request
 - `POST /api/contact-requests/` - Submit a contact form
+
+## Security (overview)
+
+- **Production operations** (proxy headers, CORS, rate limits, admin hardening, dependency scanning): see [DEPLOY.md](DEPLOY.md) (*Security and defense in depth*).
+- **Django admin** is served at **`/admin/`**; protect it with strong credentials, minimal staff users, and network controls appropriate to your environment.
+- **Blog posts** use Markdown rendered without an embedded raw-HTML pipeline by default; restrict publishing to trusted admins.
 
 ## Environment Variables
 

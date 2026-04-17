@@ -30,6 +30,8 @@ services:
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
       TRUST_X_FORWARDED_PROTO: "true"
+      # Local stack: no reCAPTCHA secret; opt out explicitly (use real secret + unset this in real prod).
+      ALLOW_PUBLIC_FORMS_WITHOUT_CAPTCHA: "true"
       DEFAULT_VAT_RATE: ${DEFAULT_VAT_RATE:-0.20}
       APPLY_VAT_BY_DEFAULT: ${APPLY_VAT_BY_DEFAULT:-True}
     depends_on:

@@ -8,7 +8,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 from .admin import BookingAdmin, InvoiceAdmin, PromotionAdmin
-from .models import Booking, Invoice, Promotion, Service
+from .models import BlogPost, Booking, Invoice, Promotion, Service
 
 
 class PromotionAndBookingFlowTests(TestCase):
@@ -45,10 +45,11 @@ class PromotionAndBookingFlowTests(TestCase):
         self.assertEqual(data["promo_code"], promo.promo_code)
         self.assertTrue(data["is_currently_active"])
 
-    def test_no_active_promotion_returns_404(self):
-        """If there is no active promotion, the API should return 404."""
+    def test_no_active_promotion_returns_200_null(self):
+        """If there is no active promotion, the API should return 200 with JSON null (no 404 log noise)."""
         response = self.client.get("/api/promotion/")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json())
 
     @override_settings(DEFAULT_VAT_RATE=0.20, APPLY_VAT_BY_DEFAULT=True)
     def test_booking_creation_applies_promo_and_vat(self):
@@ -76,9 +77,8 @@ class PromotionAndBookingFlowTests(TestCase):
             "preferred_time_window": "Morning (8am-12pm)",
             "address": "123 Main St",
             "notes": "",
-            # The frontend sends both the promo code and the discount percentage
+            # Server resolves discount from Promotion; client cannot forge promo_discount
             "promo_code": "SPRING10",
-            "promo_discount": "10.0",
         }
 
         response = self.client.post("/api/bookings/", data)
@@ -98,6 +98,103 @@ class PromotionAndBookingFlowTests(TestCase):
         self.assertEqual(
             booking.total_with_vat.quantize(Decimal("0.01")), Decimal("108.00")
         )
+
+    @override_settings(DEFAULT_VAT_RATE=0.20, APPLY_VAT_BY_DEFAULT=True)
+    def test_booking_ignores_client_forged_promo_discount(self):
+        """Forged promo_discount must not override the Promotion row."""
+        Promotion.objects.create(
+            title="Spring Sale",
+            subtitle="10% off all services",
+            badge_text="Limited Time",
+            discount_percentage=Decimal("10.0"),
+            promo_code="SPRING10",
+            is_active=True,
+        )
+        preferred_date = (timezone.now().date() + timezone.timedelta(days=1)).isoformat()
+        data = {
+            "name": "John Doe",
+            "email": "forge@example.com",
+            "phone": "1234567890",
+            "service": self.service.id,
+            "job_type": "residential",
+            "billing_type": "fixed",
+            "preferred_date": preferred_date,
+            "preferred_time_window": "Morning (8am-12pm)",
+            "address": "123 Main St",
+            "notes": "",
+            "promo_code": "SPRING10",
+            "promo_discount": "100.0",
+        }
+        response = self.client.post("/api/bookings/", data)
+        self.assertEqual(response.status_code, 201)
+        booking = Booking.objects.get(id=response.json()["id"])
+        self.assertEqual(booking.promo_discount, Decimal("10.0"))
+        self.assertEqual(booking.subtotal, Decimal("90.00"))
+
+    def test_booking_rejects_unknown_promo_code(self):
+        preferred_date = (timezone.now().date() + timezone.timedelta(days=1)).isoformat()
+        data = {
+            "name": "John Doe",
+            "email": "unknown@example.com",
+            "phone": "1234567890",
+            "service": self.service.id,
+            "job_type": "residential",
+            "billing_type": "fixed",
+            "preferred_date": preferred_date,
+            "preferred_time_window": "Morning (8am-12pm)",
+            "address": "123 Main St",
+            "notes": "",
+            "promo_code": "NOTREAL",
+        }
+        response = self.client.post("/api/bookings/", data)
+        self.assertEqual(response.status_code, 400)
+        body = response.json()
+        self.assertIn("promo_code", body.get("details", body))
+
+    def test_booking_rejects_inactive_promo(self):
+        Promotion.objects.create(
+            title="Inactive",
+            discount_percentage=Decimal("50.0"),
+            promo_code="DEAD",
+            is_active=False,
+        )
+        preferred_date = (timezone.now().date() + timezone.timedelta(days=1)).isoformat()
+        data = {
+            "name": "John Doe",
+            "email": "inactive@example.com",
+            "phone": "1234567890",
+            "service": self.service.id,
+            "job_type": "residential",
+            "billing_type": "fixed",
+            "preferred_date": preferred_date,
+            "preferred_time_window": "Morning (8am-12pm)",
+            "address": "123 Main St",
+            "notes": "",
+            "promo_code": "DEAD",
+        }
+        response = self.client.post("/api/bookings/", data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_blog_list_only_returns_published_posts(self):
+        BlogPost.objects.create(
+            title="Draft",
+            slug="draft-post",
+            excerpt="",
+            content="Secret",
+            is_published=False,
+        )
+        BlogPost.objects.create(
+            title="Public",
+            slug="public-post",
+            excerpt="",
+            content="OK",
+            is_published=True,
+        )
+        response = self.client.get("/api/blog-posts/")
+        self.assertEqual(response.status_code, 200)
+        slugs = [p["slug"] for p in response.json()]
+        self.assertIn("public-post", slugs)
+        self.assertNotIn("draft-post", slugs)
 
     @override_settings(DEFAULT_VAT_RATE=0.20, APPLY_VAT_BY_DEFAULT=True)
     def test_booking_creation_without_promo_still_applies_vat(self):

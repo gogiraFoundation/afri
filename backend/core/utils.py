@@ -1,6 +1,70 @@
+import json
+import re
 from decimal import Decimal
+from html import escape
+from urllib import parse, request
+
 from django.core.mail import send_mail
 from django.conf import settings
+
+
+def sanitize_email_header_fragment(value):
+    """Strip newlines from values used in email subjects/headers (header injection defense)."""
+    if value is None:
+        return ''
+    return ' '.join(re.split(r'[\r\n]+', str(value))).strip()
+
+
+def verify_recaptcha_token(token, remote_ip=None):
+    """
+    Verify Google reCAPTCHA via siteverify. Returns None on success, or an error message string.
+
+    ``remoteip`` should be the real client IP; callers typically pass the value from
+    ``_client_ip_for_captcha`` (see serializers). Trust assumptions for
+    ``X-Forwarded-For`` are documented in DEPLOY.md.
+
+    - v2 checkbox: checks success only.
+    - v3: if the response includes ``score``, enforces RECAPTCHA_MIN_SCORE (default 0.5 when unset).
+    - Optional RECAPTCHA_EXPECTED_HOSTNAME: compare to response hostname when present.
+    """
+    secret = getattr(settings, 'CONTACT_FORM_CAPTCHA_SECRET', '') or ''
+    if not secret:
+        return 'Captcha is not configured.'
+
+    data = {'secret': secret, 'response': token}
+    if remote_ip:
+        data['remoteip'] = remote_ip
+    payload = parse.urlencode(data).encode()
+    req = request.Request(
+        'https://www.google.com/recaptcha/api/siteverify',
+        data=payload,
+        method='POST',
+    )
+    try:
+        with request.urlopen(req, timeout=5) as response:
+            result = json.loads(response.read().decode('utf-8'))
+    except Exception:
+        return 'Captcha validation failed.'
+
+    if not result.get('success'):
+        return 'Captcha validation failed.'
+
+    if 'score' in result:
+        min_score = getattr(settings, 'RECAPTCHA_MIN_SCORE', None)
+        if min_score is None:
+            min_score = 0.5
+        try:
+            if float(result['score']) < float(min_score):
+                return 'Captcha validation failed.'
+        except (TypeError, ValueError):
+            return 'Captcha validation failed.'
+
+    expected = getattr(settings, 'RECAPTCHA_EXPECTED_HOSTNAME', '') or ''
+    if expected and result.get('hostname'):
+        if str(result['hostname']).lower() != expected.lower():
+            return 'Captcha validation failed.'
+
+    return None
 
 
 def get_vat_config_payload():
@@ -39,10 +103,12 @@ def calculate_booking_pricing(
 
     subtotal = base_price
     discount_amount = Decimal("0.00")
-    if promo_code and promo_discount:
+    # promo_discount must be resolved server-side from Promotion; never trust client-supplied values.
+    if promo_discount is not None:
         promo_discount_decimal = Decimal(str(promo_discount))
-        discount_amount = subtotal * (promo_discount_decimal / Decimal("100"))
-        subtotal = subtotal - discount_amount
+        if promo_discount_decimal > 0:
+            discount_amount = subtotal * (promo_discount_decimal / Decimal("100"))
+            subtotal = subtotal - discount_amount
 
     if getattr(settings, "APPLY_VAT_BY_DEFAULT", True):
         vat_rate = Decimal(str(getattr(settings, "DEFAULT_VAT_RATE", 0.20)))
@@ -82,7 +148,7 @@ def send_booking_notification(booking):
     admin_email = getattr(settings, 'ADMIN_EMAIL', 'admin@africleans.com')
     
     vat_rate_percent = int(Decimal(str(getattr(settings, "DEFAULT_VAT_RATE", 0.20))) * Decimal("100"))
-    subject = f'New Booking Request: {booking.service.name}'
+    subject = f'New Booking Request: {sanitize_email_header_fragment(booking.service.name)}'
     message = f"""
 New booking request received:
 
@@ -162,13 +228,14 @@ Afri Cleans Team
 
 def send_invoice_email(invoice):
     """Send invoice/receipt email to client"""
-    from .models import Invoice
-    
     customer_email = invoice.booking.email
     customer_name = invoice.booking.name
+    customer_name_html = escape(sanitize_email_header_fragment(customer_name))
+    description_html = escape(invoice.description or '')
+    inv_num_html = escape(str(invoice.invoice_number))
     
     vat_rate_percent = int(Decimal(str(getattr(settings, "DEFAULT_VAT_RATE", 0.20))) * Decimal("100"))
-    subject = f'Invoice {invoice.invoice_number} - Afri Cleans'
+    subject = f'Invoice {sanitize_email_header_fragment(invoice.invoice_number)} - Afri Cleans'
     
     # Create HTML email content
     html_message = f"""
@@ -177,15 +244,15 @@ def send_invoice_email(invoice):
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #005461;">Afri Cleans - Invoice</h2>
             
-            <p>Dear {customer_name},</p>
+            <p>Dear {customer_name_html},</p>
             
             <p>Thank you for choosing Afri Cleans! Please find your invoice details below:</p>
             
             <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <p><strong>Invoice Number:</strong> {invoice.invoice_number}</p>
+                <p><strong>Invoice Number:</strong> {inv_num_html}</p>
                 <p><strong>Issue Date:</strong> {invoice.issue_date.strftime('%B %d, %Y')}</p>
                 {f'<p><strong>Due Date:</strong> {invoice.due_date.strftime("%B %d, %Y")}</p>' if invoice.due_date else ''}
-                <p><strong>Service:</strong> {invoice.description}</p>
+                <p><strong>Service:</strong> {description_html}</p>
             </div>
             
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -257,7 +324,7 @@ def send_contact_notification(contact_request):
     """Send email notification when a new contact request is created"""
     admin_email = getattr(settings, 'ADMIN_EMAIL', 'admin@africleans.com')
     
-    subject = f'New Contact Request from {contact_request.name}'
+    subject = f'New Contact Request from {sanitize_email_header_fragment(contact_request.name)}'
     message = f"""
 New contact request received:
 

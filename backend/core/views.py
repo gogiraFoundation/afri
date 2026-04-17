@@ -1,3 +1,6 @@
+import json
+
+from django.http import HttpResponse
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, ScopedRateThrottle, UserRateThrottle
@@ -93,7 +96,14 @@ class ActivePromotionAPIView(APIView):
         if promotion and promotion.is_currently_active():
             serializer = PromotionSerializer(promotion)
             return Response(serializer.data)
-        return Response({'detail': 'No active promotion'}, status=status.HTTP_404_NOT_FOUND)
+        # 200 + JSON null avoids 404 log noise on every page load when no promo exists.
+        # Use HttpResponse so the body is literal `null` with Content-Type (DRF Response(None)
+        # can omit Content-Type in some setups, breaking response.json() in tests/clients).
+        return HttpResponse(
+            json.dumps(None),
+            content_type='application/json; charset=utf-8',
+            status=status.HTTP_200_OK,
+        )
 
 
 class HealthCheckAPIView(APIView):
@@ -122,13 +132,10 @@ class BlogPostListAPIView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        # Prefer published posts; if none exist yet, fall back to the
-        # first 5 posts (e.g., drafts) so the homepage can still show titles.
-        published = BlogPost.objects.filter(is_published=True).order_by('-published_at', '-created_at')
-        if published.exists():
-          return published[:5]
-
-        return BlogPost.objects.all().order_by('-created_at')[:5]
+        return (
+            BlogPost.objects.filter(is_published=True)
+            .order_by('-published_at', '-created_at')[:5]
+        )
 
 
 class BlogPostDetailAPIView(generics.RetrieveAPIView):

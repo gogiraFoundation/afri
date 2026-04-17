@@ -26,9 +26,12 @@ This guide covers deploying the **Afri Cleans Django backend** to Google Cloud R
 3. **Set production environment variables on Cloud Run**  
    Do not put secrets in code or in `cloudbuild.yaml`. Configure them once on the Cloud Run service or pass them when deploying:
    - **SECRET_KEY** (required in production): a long random string for Django.
-  - **ALLOWED_HOSTS**: required hostnames only, e.g. `afri-api-xxxxx.run.app,api.example.com` (no wildcard, no `https://`).
+   - **ALLOWED_HOSTS**: required hostnames only, e.g. `afri-api-xxxxx.run.app,api.example.com` (no wildcard, no `https://`).
    - **CSRF_TRUSTED_ORIGINS** (if your frontend talks to the API): e.g. `https://your-frontend-domain.com`.
    - Optional: `DEBUG=0`, `DEFAULT_VAT_RATE`, `APPLY_VAT_BY_DEFAULT`, etc.
+   - **Public forms (booking / contact):** In production, Django requires **`CONTACT_FORM_CAPTCHA_SECRET`** (Google reCAPTCHA *secret* key) unless you explicitly set **`ALLOW_PUBLIC_FORMS_WITHOUT_CAPTCHA=true`** (discouraged). If the secret is unset and the opt-out is not set, the app will not start. Optional: **`RECAPTCHA_MIN_SCORE`** (v3 score threshold), **`RECAPTCHA_EXPECTED_HOSTNAME`** (must match siteverify `hostname`).
+   - **CORS / CSRF:** Set **`CORS_ALLOWED_ORIGINS`** and **`CSRF_TRUSTED_ORIGINS`** to your exact frontend origins (no `*`). With `CORS_ALLOW_CREDENTIALS`, broad origins are a common misconfiguration.
+   - **Behind HTTPS proxies:** Set **`TRUST_X_FORWARDED_PROTO=true`** so secure cookies and redirects behave correctly.
 
    You can set these when running the deploy script (see below) or in the Cloud Run console: **Cloud Run → your service → Edit & deploy → Variables & secrets**.
 
@@ -119,6 +122,40 @@ After the trigger is set up, each push to `main` will build the backend image an
 
 ---
 
+## Security and defense in depth
+
+### Client IP, `X-Forwarded-For`, and HTTPS behind proxies
+
+- **`TRUST_X_FORWARDED_PROTO=true`** tells Django to trust `X-Forwarded-Proto` for secure cookies and redirects when TLS terminates at a load balancer or reverse proxy. Configure this to match your actual deployment (see also Docker Compose notes below).
+- **reCAPTCHA `remoteip`:** The backend passes a client IP to Google’s siteverify using the **first** comma-separated value in `X-Forwarded-For` when that header is present, otherwise `REMOTE_ADDR`. That first hop is **only trustworthy** if your **edge** overwrites or correctly **appends** the real client (clients must not be able to prepend arbitrary IPs). On **Cloud Run** and similar platforms, rely on the platform’s documented proxy behavior; a misconfigured edge makes `remoteip` wrong and also makes **DRF throttling** (when keyed by IP) unreliable across instances.
+
+### Rate limiting (DRF vs edge)
+
+- **Django REST Framework** throttles are **application-level** and **per process**; they do not coordinate across multiple containers or regions.
+- Add **per-IP (or per-key) limits at the reverse proxy, API gateway, or WAF** (e.g. Google Cloud Armor, Cloudflare, nginx) for `POST` to public form endpoints as defense in depth. Tuning POST-only limits at the edge often requires WAF rules or careful nginx configuration; see commented examples in [`frontend/nginx.conf`](frontend/nginx.conf) for the Docker frontend proxy.
+
+### PII in JSON responses
+
+- Successful **`POST /api/bookings/`** (and similar) responses include **contact and booking fields**. Treat traffic as sensitive: **HTTPS only** in production, and **do not log full request or response bodies** in proxies, load balancers, or application loggers (log identifiers such as request IDs or resource IDs instead).
+
+### CORS and credentials
+
+- The API uses **`CORS_ALLOW_CREDENTIALS = True`**. In production, set **`CORS_ALLOWED_ORIGINS`** to the **exact** browser origins that serve your SPA (scheme + host + port), **never** `*` with credentials. Keep **`CSRF_TRUSTED_ORIGINS`** aligned with the same sites if you use cookie-based flows.
+
+### Django admin (`/admin/`)
+
+- The admin UI is a **high-value** surface at **`/admin/`**. Use **strong passwords**, **minimal** staff/superuser accounts, **MFA** where your hosting or identity provider supports it, optional **IP allowlisting** at the load balancer or VPN, and monitoring for **brute-force** attempts.
+
+### Dependencies and supply chain
+
+- CI runs **`pip-audit`** and **`npm audit`** (see [`.github/workflows/security-checks.yml`](.github/workflows/security-checks.yml)). Prefer **pinned** or **locked** dependencies (`pip-compile`, lockfiles) for reproducible builds and clearer security reviews on upgrades.
+
+### Blog content (Markdown)
+
+- Blog posts are rendered with **react-markdown** without a raw-HTML pipeline by default, which **reduces XSS risk** from stored content. **Admin-authored** Markdown should still be limited to **trusted** staff.
+
+---
+
 ## Docker Compose (full stack)
 
 From the repository root, a production-style stack is defined in [`docker-compose.yml`](docker-compose.yml):
@@ -143,3 +180,4 @@ Then open `http://localhost` (frontend on port 80) or `http://localhost:8080` fo
 - Set `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS` to your public site URLs when the browser origin is not `http://localhost`.
 - Set `TRUST_X_FORWARDED_PROTO=true` when TLS terminates at a reverse proxy (included in `docker-compose.yml`).
 - For HTTPS-only cookies and HSTS, keep `ENVIRONMENT=production` and `DEBUG=False` (as in compose) and tune `SECURE_SSL_REDIRECT` / `SECURE_HSTS_*` via environment if needed.
+- **Email:** Use a real SMTP or transactional provider in production (`EMAIL_BACKEND`, `EMAIL_HOST`, etc.). The Django console backend prints entire messages to stdout and is unsuitable for production and for protecting customer PII in logs.
