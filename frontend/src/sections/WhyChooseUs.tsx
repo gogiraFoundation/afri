@@ -1,5 +1,6 @@
 import { scrollToContact } from '../config/site';
 import lobbyFloorMopping from '../assets/lobby-floor-mopping.png';
+import './WhyChooseUs.css';
 
 const WhyChooseUs = () => {
   const features = [
@@ -20,6 +21,13 @@ const WhyChooseUs = () => {
     },
   ];
 
+  const trustPoints = [
+    'Clear scope before every visit',
+    'Professional teams and careful handling',
+    'Flexible scheduling for homes and businesses',
+    'Follow-up support if anything is missed',
+  ];
+
   const handleViewServices = () => {
     window.location.href = '/services';
   };
@@ -33,12 +41,14 @@ const WhyChooseUs = () => {
       <div className="container">
         <div className="why-choose-container">
           <div className="why-choose-content">
-            <span className="section-title">WHY CHOOSE US</span>
-            <h2>Flexibility and quality you can feel</h2>
-            <p className="why-choose-description">
-              We combine adaptable booking with dependable standards—so you get a service that
-              works around your life, not the other way around.
-            </p>
+            <div className="why-choose-header">
+              <span className="section-title">WHY CHOOSE US</span>
+              <h2>Flexibility and quality you can feel</h2>
+              <p className="why-choose-description">
+                We combine adaptable booking with dependable standards—so you get a service that
+                works around your life, not the other way around.
+              </p>
+            </div>
             <ul className="why-choose-features">
               {features.map((feature) => (
                 <li key={feature.title} className="feature-item">
@@ -51,10 +61,10 @@ const WhyChooseUs = () => {
               ))}
             </ul>
             <div className="why-choose-actions">
-              <button className="btn btn-primary" onClick={handleGetQuote}>
+              <button type="button" className="btn btn-primary" onClick={handleGetQuote}>
                 Get a Free Quote
               </button>
-              <button className="btn btn-outline" onClick={handleViewServices}>
+              <button type="button" className="btn btn-outline" onClick={handleViewServices}>
                 View Services
               </button>
             </div>
@@ -65,22 +75,21 @@ const WhyChooseUs = () => {
                 src={lobbyFloorMopping}
                 alt="Cleaning professional mopping a bright modern lobby"
                 className="why-choose-image"
+                width={600}
+                height={450}
+                loading="lazy"
+                decoding="async"
               />
             </div>
-            <div className="stats-grid">
-              <h3 className="stats-title">Built for dependable service</h3>
-              <div className="stat-card">
-                <div className="stat-label">Clear scope before every visit</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Professional teams and careful handling</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Flexible scheduling for homes and businesses</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Follow-up support if anything is missed</div>
-              </div>
+            <div className="why-choose-trust-panel">
+              <h3 className="why-choose-trust-title">Built for dependable service</h3>
+              <ul className="why-choose-trust-list">
+                {trustPoints.map((point) => (
+                  <li key={point} className="why-choose-trust-item">
+                    {point}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
