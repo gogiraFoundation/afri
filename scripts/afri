@@ -108,6 +108,10 @@ Deploy (wraps existing scripts)
   ./scripts/afri deploy cloudrun [args] # backend/deploy_backend_cloud_run.sh (needs PROJECT_ID)
   ./scripts/afri deploy cloudflare      # frontend/deploy_frontend_cloudflare.sh
 
+Security (pre-deploy audit)
+  ./scripts/afri security [args]          # full stack: scripts/security_checklist
+  ./scripts/afri security-frontend [args] # frontend only: scripts/security_checklist_frontend
+
 Other
   ./scripts/afri doctor | check         # tool versions + quick env checks
   ./scripts/afri clean                  # docker compose down -v (prompts YES)
@@ -359,6 +363,14 @@ main() {
     deploy)
       shift
       cmd_deploy "$@"
+      ;;
+    security | security-checklist)
+      shift
+      exec bash "$SCRIPT_DIR/security_checklist" "$@"
+      ;;
+    security-frontend | frontend-security)
+      shift
+      exec bash "$SCRIPT_DIR/security_checklist_frontend" "$@"
       ;;
     *)
       echo "Unknown command: $cmd" >&2

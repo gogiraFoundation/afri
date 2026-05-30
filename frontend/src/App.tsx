@@ -5,9 +5,8 @@ import Services from './sections/Services';
 import WhyChooseUs from './sections/WhyChooseUs';
 import Process from './sections/Process';
 import Testimonials from './sections/Testimonials';
-import Booking from './sections/Booking';
+import ContactQuote from './sections/ContactQuote';
 import FAQ from './sections/FAQ';
-import Blog from './sections/Blog';
 
 function App() {
   return (
@@ -18,9 +17,8 @@ function App() {
       <WhyChooseUs />
       <Process />
       <Testimonials />
-      <Booking />
+      <ContactQuote />
       <FAQ />
-      <Blog />
     </MarketingLayout>
   );
 }

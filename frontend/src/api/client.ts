@@ -1,5 +1,5 @@
 // API Client for Afri Cleans
-import type { Service, Booking, BookingFormData, ContactRequest, ContactFormData, Promotion, BlogPost, VATConfig } from '../types/api';
+import type { Service, Booking, BookingFormData, ContactRequest, ContactFormData, Promotion, VATConfig } from '../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -61,11 +61,64 @@ export async function getServices(): Promise<Service[]> {
   return extractList<Service>(data);
 }
 
+export class ApiValidationError extends Error {
+  readonly fields: Record<string, string>;
+
+  constructor(message: string, fields: Record<string, string>) {
+    super(message);
+    this.name = 'ApiValidationError';
+    this.fields = fields;
+  }
+}
+
+function parseDrfFieldErrors(payload: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!payload || typeof payload !== 'object') return out;
+  const obj = payload as Record<string, unknown>;
+  for (const [key, val] of Object.entries(obj)) {
+    if (key === 'detail' || key === 'message') continue;
+    if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'string') {
+      out[key] = val[0];
+    } else if (typeof val === 'string') {
+      out[key] = val;
+    }
+  }
+  return out;
+}
+
 export async function createBooking(data: BookingFormData): Promise<Booking> {
-  return apiRequest<Booking>('/bookings/', {
+  const url = `${API_BASE_URL}/bookings/`;
+  const response = await fetch(url, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+
+  const body: unknown = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const fields = parseDrfFieldErrors(body);
+    const detail =
+      body &&
+      typeof body === 'object' &&
+      'detail' in body &&
+      typeof (body as { detail: unknown }).detail === 'string'
+        ? (body as { detail: string }).detail
+        : undefined;
+    const message =
+      body &&
+      typeof body === 'object' &&
+      'message' in body &&
+      typeof (body as { message: unknown }).message === 'string'
+        ? (body as { message: string }).message
+        : undefined;
+    if (Object.keys(fields).length > 0) {
+      throw new ApiValidationError(detail || message || 'Please check the highlighted fields.', fields);
+    }
+    throw new Error(detail || message || `HTTP error! status: ${response.status}`);
+  }
+
+  return body as Booking;
 }
 
 export async function createContactRequest(data: ContactFormData): Promise<ContactRequest> {
@@ -90,14 +143,5 @@ export async function getActivePromotion(): Promise<Promotion | null> {
 
 export async function getVATConfig(): Promise<VATConfig> {
   return apiRequest<VATConfig>('/vat-config/');
-}
-
-export async function getBlogPosts(): Promise<BlogPost[]> {
-  const data: unknown = await apiRequest<unknown>('/blog-posts/');
-  return extractList<BlogPost>(data);
-}
-
-export async function getBlogPost(slug: string): Promise<BlogPost> {
-  return apiRequest<BlogPost>(`/blog-posts/${slug}/`);
 }
 

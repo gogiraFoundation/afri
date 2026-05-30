@@ -52,13 +52,11 @@
 
 .feature-item {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-  font-size: 1.125rem;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
   color: var(--color-text-dark);
-  text-align: center;
+  text-align: left;
 }
 
 .feature-check {
@@ -72,6 +70,27 @@
   border-radius: 50%;
   font-weight: var(--font-weight-bold);
   flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.feature-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.feature-heading {
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  color: var(--color-text-dark);
+}
+
+.feature-text {
+  font-size: 1rem;
+  color: var(--color-text-light);
+  line-height: 1.6;
+  margin: 0;
 }
 
 .why-choose-visual {

@@ -1,14 +1,23 @@
-import './WhyChooseUs.css';
+import { scrollToContact } from '../config/site';
 import lobbyFloorMopping from '../assets/lobby-floor-mopping.png';
 
 const WhyChooseUs = () => {
   const features = [
-    'Personalized cleaning plans for your exact needs',
-    'Trained professionals who respect your space',
-    'Optional eco-friendly cleaning products',
-    'Transparent pricing with no hidden surprises',
-    'Easy booking and dependable arrival times',
-    'Quick issue resolution if anything is missed',
+    {
+      title: 'Scheduling that fits you',
+      description:
+        'One-off deep cleans, regular upkeep, or business hours—we align visits with your calendar and adjust when plans change.',
+    },
+    {
+      title: 'Consistent quality, every time',
+      description:
+        'Clear checklists, the same attention to detail on every job, and teams who treat your space with care from arrival to handover.',
+    },
+    {
+      title: 'Digital proof of clean',
+      description:
+        'After every visit we send a WhatsApp message with before/after photos and a completed checklist, so you come home to a guaranteed result.',
+    },
   ];
 
   const handleViewServices = () => {
@@ -16,10 +25,7 @@ const WhyChooseUs = () => {
   };
 
   const handleGetQuote = () => {
-    const element = document.getElementById('booking');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollToContact();
   };
 
   return (
@@ -28,16 +34,19 @@ const WhyChooseUs = () => {
         <div className="why-choose-container">
           <div className="why-choose-content">
             <span className="section-title">WHY CHOOSE US</span>
-            <h2>Why Clients Choose Afri Cleans</h2>
+            <h2>Flexibility and quality you can feel</h2>
             <p className="why-choose-description">
-              We may be new, but our approach is built on proven cleaning standards: clear
-              expectations, trained teams, and consistent execution.
+              We combine adaptable booking with dependable standards—so you get a service that
+              works around your life, not the other way around.
             </p>
             <ul className="why-choose-features">
-              {features.map((feature, index) => (
-                <li key={index} className="feature-item">
+              {features.map((feature) => (
+                <li key={feature.title} className="feature-item">
                   <span className="feature-check">✓</span>
-                  <span>{feature}</span>
+                  <div className="feature-copy">
+                    <h3 className="feature-heading">{feature.title}</h3>
+                    <p className="feature-text">{feature.description}</p>
+                  </div>
                 </li>
               ))}
             </ul>

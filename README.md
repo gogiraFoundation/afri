@@ -121,6 +121,8 @@ A modern, responsive website for Afri Cleans featuring a React+TypeScript fronte
 
 ## Security (overview)
 
+- **Pre-deploy audit:** `./scripts/security_checklist` or `./scripts/afri security` — see [SECURITY_CHECKS.md](SECURITY_CHECKS.md).
+- **Frontend-only audit:** `./scripts/security_checklist_frontend` or `./scripts/afri security-frontend` — see [frontend/SECURITY_CHECKS.md](frontend/SECURITY_CHECKS.md).
 - **Production operations** (proxy headers, CORS, rate limits, admin hardening, dependency scanning): see [DEPLOY.md](DEPLOY.md) (*Security and defense in depth*).
 - **Django admin** is served at **`/admin/`**; protect it with strong credentials, minimal staff users, and network controls appropriate to your environment.
 - **Blog posts** use Markdown rendered without an embedded raw-HTML pipeline by default; restrict publishing to trusted admins.

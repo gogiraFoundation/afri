@@ -1,0 +1,55 @@
+.contact-quote-section {
+  background: var(--color-background-light, #f8f9fa);
+}
+
+.contact-quote-inner {
+  max-width: 42rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.contact-quote-header h2 {
+  margin-bottom: var(--spacing-md, 1rem);
+  color: var(--color-primary-dark, #1a3a2f);
+}
+
+.contact-quote-lede {
+  color: var(--color-text-light, #5a6b63);
+  line-height: 1.7;
+  margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+.contact-quote-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 0.75rem);
+  align-items: stretch;
+  margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+@media (min-width: 480px) {
+  .contact-quote-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .contact-quote-btn {
+    flex: 0 1 auto;
+  }
+}
+
+.contact-quote-print-links {
+  font-size: 0.9375rem;
+  color: var(--color-text-light, #5a6b63);
+}
+
+.contact-quote-print-links a {
+  color: var(--color-primary, #2d6a4f);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.contact-quote-print-links a:hover {
+  color: var(--color-primary-dark, #1a3a2f);
+}

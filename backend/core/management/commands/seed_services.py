@@ -8,51 +8,71 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         services_data = [
             {
-                'name': 'Residential Cleaning',
+                'name': 'Residential Eco-Clean',
                 'slug': 'residential-cleaning',
-                'short_description': 'Experience a sparkling home with our thorough residential cleaning services.',
-                'long_description': 'Our residential cleaning service includes deep cleaning of all rooms, kitchen and bathroom sanitization, dusting, vacuuming, and mopping. We use eco-friendly products to ensure a safe environment for your family.',
+                'short_description': 'Homes and flats — weekly, deep, or move-out visits with the same Eco-Clean checklist.',
+                'long_description': (
+                    'Every residential visit follows our Eco-Clean standard: microfibre dusting (no paper towels), '
+                    'HEPA vacuuming and steam mopping, kitchen wipe-down with hob degreasing and sanitised worktops, '
+                    'bathroom scrub with mirror and chrome polishing, and tidy rubbish and recycling. '
+                    'Choose weekly or recurring visits, a deep clean, or end-of-tenancy handover — scope stays the same; '
+                    'time on site and detail level adjust to the visit type.'
+                ),
                 'is_active': True,
                 'display_order': 1,
                 'price_from': 99.00,
             },
             {
-                'name': 'Commercial Cleaning',
-                'slug': 'commercial-cleaning',
-                'short_description': 'Keep your business spotless with our professional commercial cleaning solutions.',
-                'long_description': 'We provide comprehensive commercial cleaning services for offices, retail spaces, and other business establishments. Our team ensures a professional and hygienic environment for your employees and customers.',
+                'name': 'Office Eco-Clean',
+                'slug': 'office-cleaning',
+                'short_description': 'Workspaces — scheduled rounds with the same Eco-Clean standard as our home visits.',
+                'long_description': (
+                    'Desks, meeting rooms, kitchens, and washrooms for small and medium offices. '
+                    'The same Eco-Clean checklist as residential: microfibre dusting, HEPA-filtered vacuuming and steam '
+                    'mopping, kitchen and bathroom care, and neat waste and recycling. '
+                    'Book weekly or recurring cleans, a periodic deep clean, or move-out readiness.'
+                ),
                 'is_active': True,
                 'display_order': 2,
                 'price_from': 199.00,
             },
             {
-                'name': 'Carpet Cleaning',
-                'slug': 'carpet-cleaning',
-                'short_description': 'Deep clean and restore your carpets to their original beauty.',
-                'long_description': 'Professional carpet cleaning using advanced steam cleaning and extraction methods. We remove deep-seated dirt, stains, and allergens to extend the life of your carpets.',
+                'name': 'Deep clean & end of tenancy',
+                'slug': 'deep-clean-end-of-tenancy',
+                'short_description': 'Longer on-site reset or handover — same Eco-Clean scope, extra time where it counts.',
+                'long_description': (
+                    'Not a separate “line” of work: the same Eco-Clean checklist with more hours for buildup, '
+                    'detail, and landlord-ready finish. Ideal after a busy period, before handover, or when you want '
+                    'a full reset while keeping the same methods and equipment standards.'
+                ),
                 'is_active': True,
                 'display_order': 3,
                 'price_from': 149.00,
             },
         ]
 
-        created_count = 0
+        updated_count = 0
         for service_data in services_data:
-            service, created = Service.objects.get_or_create(
-                slug=service_data['slug'],
-                defaults=service_data
-            )
+            slug = service_data['slug']
+            defaults = {k: v for k, v in service_data.items() if k != 'slug'}
+            _, created = Service.objects.update_or_create(slug=slug, defaults=defaults)
             if created:
-                created_count += 1
-                self.stdout.write(
-                    self.style.SUCCESS(f'Created service: {service.name}')
-                )
+                self.stdout.write(self.style.SUCCESS(f'Created service: {service_data["name"]}'))
             else:
-                self.stdout.write(
-                    self.style.WARNING(f'Service already exists: {service.name}')
+                updated_count += 1
+                self.stdout.write(self.style.WARNING(f'Updated service: {service_data["name"]}'))
+
+        legacy_slugs = ('commercial-cleaning', 'carpet-cleaning')
+        deactivated = Service.objects.filter(slug__in=legacy_slugs).update(is_active=False)
+        if deactivated:
+            self.stdout.write(
+                self.style.WARNING(
+                    f'Deactivated {deactivated} legacy service row(s): {", ".join(legacy_slugs)}.'
                 )
+            )
 
         self.stdout.write(
-            self.style.SUCCESS(f'Successfully seeded {created_count} new services.')
+            self.style.SUCCESS(
+                f'Seed complete. {updated_count} existing row(s) refreshed by slug.'
+            )
         )
-

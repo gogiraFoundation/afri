@@ -41,7 +41,7 @@ def verify_recaptcha_token(token, remote_ip=None):
         method='POST',
     )
     try:
-        with request.urlopen(req, timeout=5) as response:
+        with request.urlopen(req, timeout=5) as response:  # nosec B310 — HTTPS to Google siteverify only
             result = json.loads(response.read().decode('utf-8'))
     except Exception:
         return 'Captcha validation failed.'

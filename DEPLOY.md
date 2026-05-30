@@ -40,6 +40,19 @@ This guide covers deploying the **Afri Cleans Django backend** to Google Cloud R
 
 ---
 
+## Pre-deploy security audit
+
+Before any production deploy, run:
+
+```bash
+./scripts/security_checklist
+# or: ./scripts/afri security
+```
+
+`./scripts/deploy-gcp.sh` runs a quick audit automatically (`--quick --skip-gitleaks`). See [SECURITY_CHECKS.md](SECURITY_CHECKS.md).
+
+---
+
 ## Manual deploy
 
 From the repository root:

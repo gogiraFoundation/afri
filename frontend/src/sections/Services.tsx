@@ -1,150 +1,94 @@
-import { useState, useEffect } from 'react';
-import { getServices } from '../api/client';
-import type { Service } from '../types/api';
+import { scrollToContact } from '../config/site';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import residentialImg from '../assets/sofa-upholstery-cleaning.png';
-import commercialImg from '../assets/hotel-corridor-cleaning.png';
-import carpetImg from '../assets/hero-floor-cleaning.png';
-import defaultServiceImg from '../assets/lobby-floor-mopping.png';
+import officeImg from '../assets/hotel-corridor-cleaning.png';
 import './Services.css';
 
-const getServiceImage = (service: Service) => {
-  switch (service.slug) {
-    case 'residential-cleaning':
-      return residentialImg;
-    case 'commercial-cleaning':
-      return commercialImg;
-    case 'carpet-cleaning':
-      return carpetImg;
-    default:
-      return defaultServiceImg;
-  }
-};
+const visitTypes = ['Weekly or recurring visits', 'Deep cleaning', 'Move-out / end of tenancy'];
+
+const ecoCleanInclusions = [
+  'Dusting all surfaces with microfibre cloths (no paper towels)',
+  'Vacuuming & steam mopping with HEPA-filtered machines',
+  'Kitchen wipe-down, hob degreasing, and worktop sanitising',
+  'Bathroom scrub, mirror and chrome polishing',
+  'Rubbish removal and recycling neatness',
+];
 
 const Services = () => {
   const scrollToBooking = () => {
-    const el = document.getElementById('booking');
-    if (!el) return;
-    const prefersReduced =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    el.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth' });
+    scrollToContact();
   };
 
   const { ref, isVisible } = useScrollAnimation();
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const data = await getServices();
-        setServices(data.filter(s => s.is_active).slice(0, 3));
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error('Failed to fetch services:', error);
-        }
-        // Fallback to default services if API fails
-        setServices([
-          {
-            id: 1,
-            name: 'Home Cleaning',
-            slug: 'residential-cleaning',
-            short_description:
-              'Routine, deep, and move-in/move-out cleaning for apartments and homes.',
-            long_description: '',
-            is_active: true,
-            display_order: 1,
-          },
-          {
-            id: 2,
-            name: 'Office Cleaning',
-            slug: 'office-cleaning',
-            short_description:
-              'Clean, organized workspaces that support staff wellbeing and productivity.',
-            long_description: '',
-            is_active: true,
-            display_order: 2,
-          },
-          {
-            id: 3,
-            name: 'Commercial Cleaning',
-            slug: 'commercial-cleaning',
-            short_description:
-              'Flexible cleaning plans for shops, clinics, and shared facilities.',
-            long_description: '',
-            is_active: true,
-            display_order: 3,
-          },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchServices();
-  }, []);
-
-  const coreServices = [
-    'Residential cleaning services',
-    'Commercial cleaning services',
-    'Carpet cleaning services',
-    'Window cleaning services',
-    'Deep cleaning services',
-    'Post-construction cleaning',
-    'Move-in cleaning',
-    'Move-out cleaning',
-    'Office cleaning',
-    'Eco-friendly cleaning options',
-  ];
 
   return (
-    <section id="services" ref={ref as React.RefObject<HTMLElement>} className={`section services-section ${isVisible ? 'animate-in' : ''}`}>
+    <section id="services" ref={ref} className={`section services-section ${isVisible ? 'animate-in' : ''}`}>
       <div className="container">
         <div className="services-header">
           <span className="section-title">SERVICES</span>
-          <h2>Cleaning Services Designed Around You</h2>
+          <h2>Residential &amp; office cleaning</h2>
           <p className="services-description">
-            From homes to shared workplaces, we build service plans around your priorities, timing,
-            and budget.
+            The same Eco-Clean standard for homes and workplaces — scheduled the way you need it: weekly upkeep,
+            a full deep clean, or move-out readiness.
           </p>
         </div>
 
-        {loading ? (
-          <div className="services-loading">Loading services...</div>
-        ) : (
-          <div className="services-grid">
-            {services.map((service) => (
-              <div key={service.id} className="service-card">
-                <div className="service-image">
-                  <img
-                    src={getServiceImage(service)}
-                    alt={`${service.name} cleaning service`}
-                    className="service-image-img"
-                  />
-                </div>
-                <div className="service-content">
-                  <h3 className="service-title">{service.name}</h3>
-                  <p className="service-description">{service.short_description}</p>
-                  <a href="#" className="service-link">
-                    View details →
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="services-grid">
+          <article className="service-card">
+            <div className="service-image">
+              <img src={residentialImg} alt="Living space after cleaning" className="service-image-img" />
+            </div>
+            <div className="service-content">
+              <h3 className="service-title">Residential</h3>
+              <p className="service-description">
+                Apartments and houses — consistent care for busy households and tenancies.
+              </p>
+              <p className="service-subheading">Visit types</p>
+              <ul className="service-visit-list">
+                {visitTypes.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <a href="/services#visit-types" className="service-link">
+                How we work →
+              </a>
+            </div>
+          </article>
 
-        <div className="services-list-wrapper">
-          <h3 className="services-list-title">Additional service options</h3>
-          <ol className="services-list">
-            {coreServices.map((item, index) => (
-              <li key={item} className="services-list-item">
-                <span className="services-list-item-number">{index + 1}.</span>
-                <span className="services-list-item-label">{item}</span>
+          <article className="service-card">
+            <div className="service-image">
+              <img src={officeImg} alt="Office corridor after cleaning" className="service-image-img" />
+            </div>
+            <div className="service-content">
+              <h3 className="service-title">Office</h3>
+              <p className="service-description">
+                Desks, kitchens, washrooms, and shared areas — reliable rounds that keep teams comfortable.
+              </p>
+              <p className="service-subheading">Visit types</p>
+              <ul className="service-visit-list">
+                {visitTypes.map((item) => (
+                  <li key={`office-${item}`}>{item}</li>
+                ))}
+              </ul>
+              <a href="/services#visit-types" className="service-link">
+                How we work →
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <div className="services-list-wrapper services-inclusions-wrapper">
+          <h3 className="services-list-title">What&apos;s included in every Eco-Clean</h3>
+          <p className="services-inclusions-lead">
+            Every visit follows the same careful scope — we don&apos;t treat &quot;eco&quot; as a separate add-on.
+          </p>
+          <ul className="services-inclusions-list">
+            {ecoCleanInclusions.map((item) => (
+              <li key={item} className="services-inclusions-item">
+                {item}
               </li>
             ))}
-          </ol>
+          </ul>
         </div>
 
         <div className="services-footer">
@@ -176,4 +120,3 @@ const Services = () => {
 };
 
 export default Services;
-

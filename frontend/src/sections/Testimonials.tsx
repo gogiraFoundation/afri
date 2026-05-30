@@ -1,4 +1,4 @@
-import './Testimonials.css';
+import { CONTACT_HASH_HREF } from '../config/site';
 
 const Testimonials = () => {
   const trustPoints = [
@@ -28,7 +28,7 @@ const Testimonials = () => {
           ))}
         </div>
         <div className="testimonials-actions">
-          <a href="#booking" className="testimonials-link-cta">
+          <a href={CONTACT_HASH_HREF} className="testimonials-link-cta">
             Get a Free Quote
           </a>
         </div>

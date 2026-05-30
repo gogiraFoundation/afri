@@ -71,6 +71,13 @@ if ! command -v gcloud &>/dev/null; then
   exit 1
 fi
 
+echo "Running pre-deploy security audit..."
+if ! bash "$SCRIPT_DIR/security_checklist" --quick --skip-gitleaks; then
+  echo "Error: security audit failed. Fix issues or run: ./scripts/security_checklist --verbose"
+  exit 1
+fi
+echo ""
+
 IMAGE_URL="gcr.io/${GCP_PROJECT_ID}/${IMAGE_NAME}"
 
 echo "Project:  $GCP_PROJECT_ID"

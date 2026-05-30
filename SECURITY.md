@@ -1,21 +1,30 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+| Component | Supported |
+| --------- | --------- |
+| `main` branch (production) | Yes |
+| Older unmaintained branches | No |
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+## Reporting a vulnerability
 
-## Reporting a Vulnerability
+If you believe you have found a security issue in the Afri Cleans website or API, please report it privately:
 
-Use this section to tell people how to report a vulnerability.
+- **Email:** security@africleans.com (replace with your operational inbox before launch)
+- **Do not** open a public GitHub issue for exploitable vulnerabilities.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+We aim to acknowledge reports within **72 hours** and will share an expected timeline for remediation when we confirm the issue.
+
+Please include: affected URL or endpoint, steps to reproduce, impact assessment, and any proof-of-concept that is safe to share.
+
+## What to expect
+
+- We will investigate and, if valid, prioritize a fix based on severity.
+- We may ask for additional information.
+- We will notify you when a fix is deployed (where appropriate).
+- We do not currently offer a paid bug bounty program.
+
+## Secure development
+
+Pre-deploy checks: `./scripts/security_checklist` (see [SECURITY_CHECKS.md](SECURITY_CHECKS.md)).

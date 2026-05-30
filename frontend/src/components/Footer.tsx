@@ -1,3 +1,12 @@
+import {
+  CONTACT_SECTION_ID,
+  EMAIL_DISPLAY,
+  MAILTO_HREF,
+  PHONE_DISPLAY,
+  TEL_HREF,
+  WHATSAPP_HREF,
+} from '../config/site';
+import BrandLogo from './BrandLogo';
 import './Footer.css';
 
 const Footer = () => {
@@ -12,7 +21,7 @@ const Footer = () => {
     { label: 'Home', action: () => scrollToSection('hero') },
     { label: 'About Us', action: () => scrollToSection('about') },
     { label: 'Services', action: () => scrollToSection('services') },
-    { label: 'Contact', action: () => scrollToSection('footer') },
+    { label: 'Contact', action: () => scrollToSection(CONTACT_SECTION_ID) },
   ];
 
   const socialLinks = [
@@ -51,7 +60,7 @@ const Footer = () => {
       <div className="container">
         <div className="footer-content">
           <div className="footer-section">
-            <div className="footer-logo">Afri</div>
+            <BrandLogo variant="footer" className="footer-logo" linkToHome={false} />
             <p className="footer-tagline">
               Professional cleaning for homes and businesses, delivered with care.
             </p>
@@ -80,14 +89,35 @@ const Footer = () => {
             <h3 className="footer-heading">Contact Us</h3>
             <div className="footer-contact">
               <p>
-                <strong>Phone:</strong> (+012)87059897
+                <strong>Phone:</strong>{' '}
+                <a href={TEL_HREF} className="footer-contact-link">
+                  {PHONE_DISPLAY}
+                </a>
               </p>
               <p>
-                <strong>Email:</strong> info@africleans.com
+                <strong>WhatsApp:</strong>{' '}
+                <a
+                  href={WHATSAPP_HREF}
+                  className="footer-contact-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {PHONE_DISPLAY}
+                </a>
+              </p>
+              <p>
+                <strong>Email:</strong>{' '}
+                <a href={MAILTO_HREF} className="footer-contact-link">
+                  {EMAIL_DISPLAY}
+                </a>
               </p>
               <p className="footer-brochure">
                 <a href="/brochure" className="footer-brochure-link">
                   View services brochure
+                </a>
+                {' · '}
+                <a href="/one-pager" className="footer-brochure-link">
+                  Price list (PDF)
                 </a>
               </p>
             </div>

@@ -32,8 +32,10 @@ export function MarketingLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="App">
-      <PromoBanner />
-      <Navbar />
+      <header className="site-header">
+        <PromoBanner />
+        <Navbar />
+      </header>
       <main>{children}</main>
       <Footer />
     </div>

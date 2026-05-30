@@ -37,7 +37,7 @@ jobs:
         run: python backend/manage.py check --deploy
 
       - name: Bandit scan
-        run: bandit -r backend -x backend/**/migrations
+        run: bandit -r backend -c backend/bandit.yaml
 
       - name: pip-audit scan
         run: pip-audit -r backend/requirements.txt

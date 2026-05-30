@@ -236,13 +236,12 @@ a:hover {
   }
 }
 
-/* Fixed navbar overlays content; satellite page heroes need extra top padding */
+/* Sticky site header (promo + nav) in flow; satellite heroes still need breathing room */
 .pricing-hero.section,
 .services-page-hero.section,
-.blog-topics-hero.section,
 .google-maps-hero.section,
 .local-seo-hero.section {
-  padding-top: calc(4.5rem + var(--spacing-2xl));
+  padding-top: calc(6.5rem + var(--spacing-2xl));
 }
 
 

@@ -3,24 +3,19 @@ import './FAQ.css';
 const FAQ = () => {
   const faqs = [
     {
-      question: 'How much do cleaning services cost?',
+      question: 'Do I need to be home?',
       answer:
-        'Pricing depends on your space size, service type, and frequency. Share your requirements and we will provide a clear quote before work starts.',
+        'No. Most clients give us a key or set a lockbox, and we are fully insured for keyholding so you can carry on with your day.',
     },
     {
-      question: 'How often should I schedule cleaning services?',
+      question: 'What if something is missed?',
       answer:
-        'Many clients choose weekly or bi-weekly service, while others prefer monthly or one-time deep cleans.',
+        "If you are not delighted, just tell us within 24 hours. We will re-clean the area free of charge. That is our Afri promise.",
     },
     {
-      question: 'Do you bring your own cleaning supplies?',
+      question: 'Are your products really safe for my cats?',
       answer:
-        'Yes. Our team arrives with cleaning tools and products, and eco-conscious options are available on request.',
-    },
-    {
-      question: 'Do you offer deep cleaning services?',
-      answer:
-        'Yes. Deep cleaning focuses on detailed areas such as kitchens, bathrooms, and other high-touch spaces.',
+        'Absolutely. We use only plant-based, biodegradable, cruelty-free cleaners. Never bleach, never ammonia.',
     },
   ];
 

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { CONTACT_HASH_HREF } from '../config/site';
 import './GoogleMapsSEOPage.css';
 
 const GoogleMapsSEOPage = () => {
@@ -7,7 +8,7 @@ const GoogleMapsSEOPage = () => {
   }, []);
 
   const goToBooking = () => {
-    window.location.href = '/#booking';
+    window.location.href = CONTACT_HASH_HREF;
   };
 
   return (
@@ -134,7 +135,6 @@ const GoogleMapsSEOPage = () => {
                 <li>Cleaning tips and how-to posts</li>
                 <li>Limited-time promotions and discounts</li>
                 <li>Before/after photos from recent cleans</li>
-                <li>Links to your latest blog posts</li>
               </ul>
             </article>
 

@@ -82,6 +82,8 @@ export interface BookingFormData {
   promo_code?: string;
   promo_discount?: number | null;
   honeypot?: string;
+  /** When backend enforces reCAPTCHA (CONTACT_FORM_CAPTCHA_SECRET). */
+  captcha_token?: string;
 }
 
 export interface ContactFormData {
@@ -90,17 +92,5 @@ export interface ContactFormData {
   phone?: string;
   message: string;
   honeypot?: string;
-}
-
-export interface BlogPost {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  seo_title?: string;
-  seo_description?: string;
-  published_at?: string;
-  created_at?: string;
 }
 

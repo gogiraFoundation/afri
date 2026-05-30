@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { CONTACT_HASH_HREF } from '../config/site';
 import './CleaningServicesNearMePage.css';
 
 const CleaningServicesNearMePage = () => {
@@ -7,11 +8,11 @@ const CleaningServicesNearMePage = () => {
   }, []);
 
   const goToBooking = () => {
-    window.location.href = '/#booking';
+    window.location.href = CONTACT_HASH_HREF;
   };
 
   const callNow = () => {
-    window.location.href = 'tel:+01287059897';
+    window.location.href = 'tel:+447412345678';
   };
 
   const emailNow = () => {
@@ -34,7 +35,7 @@ const CleaningServicesNearMePage = () => {
                 Get a Free Quote
               </button>
               <button className="btn btn-outline" onClick={callNow}>
-                Call: (+012) 87059897
+                Call: 07412 345678
               </button>
             </div>
           </div>
@@ -110,7 +111,7 @@ const CleaningServicesNearMePage = () => {
                   Get a Free Quote
                 </button>
                 <button className="btn btn-outline" onClick={callNow}>
-                  Call: (+012) 87059897
+                  Call: 07412 345678
                 </button>
                 <button className="btn btn-outline" onClick={emailNow}>
                   Email: info@africleans.com

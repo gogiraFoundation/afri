@@ -17,16 +17,20 @@
 }
 
 .footer-logo {
-  font-size: 1.75rem;
-  font-weight: var(--font-weight-bold);
   margin-bottom: var(--spacing-sm);
-  color: var(--color-white);
 }
 
 .footer-tagline {
   color: rgba(255, 255, 255, 0.8);
   line-height: 1.6;
   font-size: 0.95rem;
+}
+
+.footer-area {
+  margin-top: var(--spacing-sm);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
 }
 
 .footer-heading {

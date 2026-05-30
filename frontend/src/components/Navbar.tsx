@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { PHONE_DISPLAY, TEL_HREF, CONTACT_HASH_HREF } from '../config/site';
+import BrandLogo from './BrandLogo';
 import './Navbar.css';
-
-const TEL_HREF = 'tel:+01287059897';
 
 const navLinks: { label: string; href: string }[] = [
   { label: 'Home', href: '/#hero' },
@@ -11,7 +11,6 @@ const navLinks: { label: string; href: string }[] = [
   { label: 'How It Works', href: '/#process' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'FAQ', href: '/#faq' },
-  { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/#footer' },
 ];
 
@@ -75,9 +74,7 @@ const Navbar = () => {
   return (
     <nav className={`navbar ${isScrolled ? 'navbar-scrolled' : ''}`} aria-label="Primary">
       <div className="container navbar-container">
-        <a href="/" className="navbar-logo">
-          Afri
-        </a>
+        <BrandLogo variant="header" className="navbar-logo" />
 
         <div
           ref={menuRef}
@@ -98,10 +95,10 @@ const Navbar = () => {
             ))}
           </ul>
           <a href={TEL_HREF} className="navbar-phone">
-            (+012)87059897
+            {PHONE_DISPLAY}
           </a>
-          <a href="/#booking" className="btn btn-primary navbar-cta" onClick={() => setIsMenuOpen(false)}>
-            Get a Free Quote
+          <a href={CONTACT_HASH_HREF} className="btn navbar-cta" onClick={() => setIsMenuOpen(false)}>
+            Get a quote
           </a>
         </div>
 

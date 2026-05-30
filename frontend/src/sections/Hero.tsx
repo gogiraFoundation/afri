@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { scrollToContact } from '../config/site';
 import './Hero.css';
 import heroFloorCleaning from '../assets/hero-floor-cleaning.png';
 
@@ -25,34 +26,28 @@ const Hero = () => {
   }, [trustHighlights.length]);
 
   const scrollToBooking = () => {
-    const element = document.getElementById('booking');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollToContact();
   };
 
-  const scrollToServices = () => {
-    const element = document.getElementById('services');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+  const goToPricing = () => {
+    window.location.href = '/pricing';
   };
 
   return (
     <section id="hero" className="hero">
       <div className="container hero-container">
         <div className="hero-content">
-          <h1 className="hero-headline">Professional Cleaning, Delivered with Care</h1>
+          <h1 className="hero-headline">Afri | Eco-conscious home &amp; office cleaning</h1>
           <p className="hero-subheadline">
-            Afri Cleans helps homes and businesses stay fresh, healthy, and ready for what matters
-            most. Reliable service, clear communication, and attention to detail from day one.
+            DBS-checked team, plant-based products, and the same Eco-Clean checklist every visit — book in minutes and
+            we&apos;ll confirm your slot.
           </p>
           <div className="hero-cta">
-            <button className="btn btn-primary hero-cta-primary" onClick={scrollToBooking}>
-              Get a Free Quote
+            <button type="button" className="btn btn-primary hero-cta-primary" onClick={scrollToBooking}>
+              Get a quote
             </button>
-            <button className="btn btn-secondary hero-cta-secondary" onClick={scrollToServices}>
-              View Services
+            <button type="button" className="btn btn-secondary hero-cta-secondary" onClick={goToPricing}>
+              See pricing &amp; packages
             </button>
           </div>
           <div className="hero-trust-carousel" aria-label="Trust highlights">
@@ -94,4 +89,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

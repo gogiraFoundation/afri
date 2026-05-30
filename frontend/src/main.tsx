@@ -4,15 +4,23 @@ import './styles/global.css';
 import App from './App.tsx';
 import MarketingLayout from './components/MarketingLayout';
 import BrochurePage from './pages/BrochurePage';
-import BlogPostPage from './pages/BlogPostPage';
 import PricingPage from './pages/PricingPage';
 import ServicesPage from './pages/ServicesPage';
 import CleaningServicesNearMePage from './pages/CleaningServicesNearMePage';
-import BlogTopicsPage from './pages/BlogTopicsPage';
 import GoogleMapsSEOPage from './pages/GoogleMapsSEOPage';
+import BookRedirect from './pages/BookRedirect';
+import OnePagerPage from './pages/OnePagerPage';
 
 export function RootApp() {
   const path = window.location.pathname;
+
+  if (path === '/book') {
+    return <BookRedirect />;
+  }
+
+  if (path === '/one-pager') {
+    return <OnePagerPage />;
+  }
 
   if (path === '/pricing') {
     return (
@@ -38,14 +46,6 @@ export function RootApp() {
     );
   }
 
-  if (path === '/blog') {
-    return (
-      <MarketingLayout>
-        <BlogTopicsPage />
-      </MarketingLayout>
-    );
-  }
-
   if (path === '/google-maps-seo') {
     return (
       <MarketingLayout>
@@ -55,20 +55,7 @@ export function RootApp() {
   }
 
   if (path === '/brochure') {
-    return (
-      <MarketingLayout>
-        <BrochurePage />
-      </MarketingLayout>
-    );
-  }
-
-  if (path.startsWith('/blog/')) {
-    const slug = decodeURIComponent(path.replace('/blog/', '').replace(/\/$/, ''));
-    return (
-      <MarketingLayout>
-        <BlogPostPage slug={slug} />
-      </MarketingLayout>
-    );
+    return <BrochurePage />;
   }
 
   return <App />;

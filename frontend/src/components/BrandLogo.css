@@ -1,0 +1,31 @@
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  line-height: 0;
+}
+
+.brand-logo:hover {
+  opacity: 0.92;
+}
+
+.brand-logo-img {
+  display: block;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-logo--header .brand-logo-img {
+  height: 44px;
+  max-width: min(200px, 42vw);
+}
+
+.brand-logo--footer .brand-logo-img {
+  height: 52px;
+  max-width: 220px;
+}
+
+.brand-logo--print .brand-logo-img {
+  height: 13mm;
+  max-width: 55mm;
+}
